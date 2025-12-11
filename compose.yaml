@@ -1,0 +1,7 @@
+﻿services:
+  proximity.api:
+    image: proximity.api
+    build:
+      context: .
+      dockerfile: Proximity.Api/Dockerfile
+
