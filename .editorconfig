@@ -1,0 +1,62 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+# General settings
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+# C# formatting directives for Visual Studio and other compliant IDEs:
+# Place braces on the same line for types, methods, control blocks, etc.
+csharp_new_line_before_open_brace_types = false
+csharp_new_line_before_open_brace_methods = false
+csharp_new_line_before_open_brace_accessors = false
+csharp_new_line_before_open_brace_control_blocks = false
+csharp_new_line_before_open_brace_anonymous_methods = false
+csharp_new_line_before_open_brace_lambda_expression_body = false
+csharp_new_line_before_open_brace_object_initializer = false
+csharp_style_namespace_declarations = file_scoped:error
+
+
+# Force braces on the same line for all blocks, methods, properties, etc.
+csharp_new_line_before_open_brace = none
+
+# Optional: For .NET code style analyzers (if using Roslyn/.NET analyzers)
+dotnet_style_require_braces = always:suggestion
+
+# Optional: Visual Studio specific (for better integration)
+csharp_style_new_line_before_open_brace = none:true
+
+
+# 1. Symbol group for private methods
+dotnet_naming_symbols.private_methods.applicable_kinds = method
+dotnet_naming_symbols.private_methods.applicable_accessibilities = private
+dotnet_naming_symbols.private_methods.required_modifiers =
+
+# 2. Naming style - must start with a lowercase letter (camelCase)
+dotnet_naming_style.lower_case_start.capitalization = camel_case
+dotnet_naming_style.lower_case_start.required_prefix =
+dotnet_naming_style.lower_case_start.required_suffix =
+dotnet_naming_style.lower_case_start.word_separator =
+
+# 3. Rule connecting symbol and style
+dotnet_naming_rule.private_methods_lowercase.symbols = private_methods
+dotnet_naming_rule.private_methods_lowercase.style = lower_case_start
+dotnet_naming_rule.private_methods_lowercase.severity = error
+
+# Rule connecting symbol and style
+dotnet_naming_rule.public_methods_uppercase.symbols = public_methods
+dotnet_naming_rule.public_methods_uppercase.style = upper_case_start
+dotnet_naming_rule.public_methods_uppercase.severity = error
+
+# don't suggetst simplify if
+dotnet_style_prefer_conditional_expression_over_if_else = none:none
+dotnet_style_prefer_throw_expression = false:none
+
+csharp_style_var_elsewhere = false:suggestion
+csharp_style_var_for_built_in_types = true:none
+csharp_style_var_when_type_is_apparent = true:none

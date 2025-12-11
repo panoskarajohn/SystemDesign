@@ -1,12 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
+# 
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7BDD5672-A308-4B9F-8D5D-E5689BD7C509}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C6B24F50-4A0B-4B0C-8BBF-62E890393636}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proximity", "proximity", "{689C3131-401B-443D-8DEB-EFB7BA4CCAAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proximity.Api", "Proximity.Api\Proximity.Api.csproj", "{2223D0BA-04B0-4F8F-A709-5902BF31EBA0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proximity.Api", "src\proximity\Proximity.Api\Proximity.Api.csproj", "{2223D0BA-04B0-4F8F-A709-5902BF31EBA0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{304FA3E0-D655-4CE0-AC9C-AAC2AA499C52}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,12 +14,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{02352261-3F74-414A-9E4F-31916CE49ADF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Mongo", "src\shared\Shared.Mongo\Shared.Mongo.csproj", "{1372A907-CA08-47A1-AE56-31CA7B93D0C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{1372A907-CA08-47A1-AE56-31CA7B93D0C2} = {02352261-3F74-414A-9E4F-31916CE49ADF}
 		{689C3131-401B-443D-8DEB-EFB7BA4CCAAB} = {7BDD5672-A308-4B9F-8D5D-E5689BD7C509}
 		{2223D0BA-04B0-4F8F-A709-5902BF31EBA0} = {689C3131-401B-443D-8DEB-EFB7BA4CCAAB}
 		{02352261-3F74-414A-9E4F-31916CE49ADF} = {7BDD5672-A308-4B9F-8D5D-E5689BD7C509}
@@ -30,5 +32,9 @@ Global
 		{2223D0BA-04B0-4F8F-A709-5902BF31EBA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2223D0BA-04B0-4F8F-A709-5902BF31EBA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2223D0BA-04B0-4F8F-A709-5902BF31EBA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1372A907-CA08-47A1-AE56-31CA7B93D0C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1372A907-CA08-47A1-AE56-31CA7B93D0C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1372A907-CA08-47A1-AE56-31CA7B93D0C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1372A907-CA08-47A1-AE56-31CA7B93D0C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
