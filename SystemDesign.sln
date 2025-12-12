@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7BDD5672-A308-4B9F-8D5D-E5689BD7C509}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Mongo", "src\shared\Shared.Mongo\Shared.Mongo.csproj", "{1372A907-CA08-47A1-AE56-31CA7B93D0C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Common", "src\shared\Shared.Common\Shared.Common.csproj", "{8C089C9B-7BA6-4C11-B61B-61E48FD41E5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Web", "src\shared\Shared.Web\Shared.Web.csproj", "{89985403-2263-4D0F-ADA5-4790A09B3BC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,18 @@ Global
 		{8C089C9B-7BA6-4C11-B61B-61E48FD41E5A}.Release|x64.Build.0 = Release|Any CPU
 		{8C089C9B-7BA6-4C11-B61B-61E48FD41E5A}.Release|x86.ActiveCfg = Release|Any CPU
 		{8C089C9B-7BA6-4C11-B61B-61E48FD41E5A}.Release|x86.Build.0 = Release|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Debug|x64.Build.0 = Debug|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Debug|x86.Build.0 = Debug|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Release|x64.ActiveCfg = Release|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Release|x64.Build.0 = Release|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Release|x86.ActiveCfg = Release|Any CPU
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,5 +87,6 @@ Global
 		{02352261-3F74-414A-9E4F-31916CE49ADF} = {7BDD5672-A308-4B9F-8D5D-E5689BD7C509}
 		{1372A907-CA08-47A1-AE56-31CA7B93D0C2} = {02352261-3F74-414A-9E4F-31916CE49ADF}
 		{8C089C9B-7BA6-4C11-B61B-61E48FD41E5A} = {02352261-3F74-414A-9E4F-31916CE49ADF}
+		{89985403-2263-4D0F-ADA5-4790A09B3BC3} = {02352261-3F74-414A-9E4F-31916CE49ADF}
 	EndGlobalSection
 EndGlobal
