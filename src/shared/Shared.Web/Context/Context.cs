@@ -46,18 +46,18 @@ public interface IContext {
     Guid RequestId { get; }
     Guid CorrelationId { get; }
     string TraceId { get; }
-    string IpAddress { get; }
-    string UserAgent { get; }
-    IIdentityContext Identity { get; }
+    string? IpAddress { get; }
+    string? UserAgent { get; }
+    IIdentityContext? Identity { get; }
 }
 
 public class Context : IContext {
     public Guid RequestId { get; } = Guid.NewGuid();
     public Guid CorrelationId { get; }
     public string TraceId { get; }
-    public string IpAddress { get; }
-    public string UserAgent { get; }
-    public IIdentityContext Identity { get; }
+    public string? IpAddress { get; }
+    public string? UserAgent { get; }
+    public IIdentityContext? Identity { get; }
 
     public Context() : this(Guid.NewGuid(), $"{Guid.NewGuid():N}", null) {
     }
@@ -67,8 +67,8 @@ public class Context : IContext {
         context.Request.Headers["user-agent"]) {
     }
 
-    public Context(Guid? correlationId, string traceId, IIdentityContext identity = null, string ipAddress = null,
-        string userAgent = null) {
+    public Context(Guid? correlationId, string traceId, IIdentityContext? identity = null, string? ipAddress = null,
+        string? userAgent = null) {
         CorrelationId = correlationId ?? Guid.NewGuid();
         TraceId = traceId;
         Identity = identity;
