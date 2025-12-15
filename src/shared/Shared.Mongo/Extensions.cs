@@ -13,7 +13,7 @@ using Shared.Common;
 namespace Shared.Mongo;
 
 public static class Extensions {
-    private const string SectionName = "MongoDb";
+    private const string SectionName = "mongo";
     public static IServiceCollection AddMongo(this IServiceCollection services, IConfiguration configuration) {
         var options = configuration
             .GetRequiredSection(SectionName)
