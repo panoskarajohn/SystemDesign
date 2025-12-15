@@ -28,20 +28,20 @@ public static class Extensions {
             logger.LogInformation(
                 "Started processing a request [Request ID: '{RequestId}', Correlation ID: '{CorrelationId}', Trace ID: '{TraceId}', User ID: '{UserId}']...",
                 context.RequestId, context.CorrelationId, context.TraceId,
-                context.Identity.IsAuthenticated ? context.Identity.Id : string.Empty);
+                context.Identity?.IsAuthenticated ?? false ? context.Identity.Id : string.Empty);
 
             await next();
 
             logger.LogInformation(
                 "Finished processing a request with status code: {StatusCode} [Request ID: '{RequestId}', Correlation ID: '{CorrelationId}', Trace ID: '{TraceId}', User ID: '{UserId}']",
                 ctx.Response.StatusCode, context.RequestId, context.CorrelationId, context.TraceId,
-                context.Identity.IsAuthenticated ? context.Identity.Id : string.Empty);
+                context.Identity?.IsAuthenticated ?? false ? context.Identity.Id : string.Empty);
         });
 
         return app;
     }
 
-    public static IHostBuilder UseLogging(this IHostBuilder builder, Action<LoggerConfiguration> configure = null,
+    public static IHostBuilder UseLogging(this IHostBuilder builder, Action<LoggerConfiguration>? configure = null,
       string loggerSectionName = LoggerSectionName,
       string appSectionName = AppSectionName)
       => builder.UseSerilog((context, loggerConfiguration) => {
