@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Shared.Web.Extensions;
 
 namespace Shared.Web.Context;
 
@@ -70,7 +71,7 @@ public class Context : IContext {
         string userAgent = null) {
         CorrelationId = correlationId ?? Guid.NewGuid();
         TraceId = traceId;
-        Identity = identity ?? IdentityContext.Empty;
+        Identity = identity;
         IpAddress = ipAddress;
         UserAgent = userAgent;
     }
