@@ -15,6 +15,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\shared\Shared.Logging\Shared.Logging.csproj" />
+      <ProjectReference Include="..\..\shared\Shared.Web\Shared.Web.csproj" />
+      <ProjectReference Include="..\..\shared\Shared.Mongo\Shared.Mongo.csproj" />
     </ItemGroup>
 
 </Project>

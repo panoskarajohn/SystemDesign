@@ -59,13 +59,13 @@ public static class WebExtensions {
         services = services
             .AddSingleton(appOptions)
             .AddHttpContextAccessor()
-            .addContext();
+            .addContext()
+            .addErrorHandling();
 
 
         var version = appOptions.DisplayVersion ? $" {appOptions.Version}" : string.Empty;
-        var font = Figgle.FiggleFontParser.ParseString("Standard");
         if (appOptions.DisplayBanner) {
-            Console.WriteLine(font.Render($"{appOptions.Name}{version}"));
+            Console.WriteLine(FiggleFonts.Standard.Render($"{appOptions.Name}{version}"));
         }
 
         return services;

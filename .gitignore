@@ -10,10 +10,6 @@ project.lock.json
 *.pyc
 nupkg/
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-
 # Rider
 .idea/
 
@@ -27,7 +23,7 @@ nupkg/
 .cr/
 
 # User-specific files
-*.suo
+*.s
 *.user
 *.userosscache
 *.sln.docstates
