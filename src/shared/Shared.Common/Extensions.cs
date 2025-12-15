@@ -1,4 +1,3 @@
-using Shared.Common;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Shared.Common;
