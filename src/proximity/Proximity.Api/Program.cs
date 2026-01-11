@@ -10,8 +10,9 @@ var host = builder.Host;
 host.UseLogging();
 
 var app = builder.Build();
+app.UseApplication();
 app.UseLogging();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/health", () => "healthy");
 
 app.Run();

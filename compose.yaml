@@ -3,5 +3,47 @@
     image: proximity.api
     build:
       context: .
-      dockerfile: Proximity.Api/Dockerfile
+      dockerfile: src/proximity/Proximity.Api/Dockerfile
+    container_name: proximity-api
+    ports:
+      - "1000:8080"
+    environment:
+      ConnectionStrings__MongoDB: "mongodb://root:rootpassword@mongodb:27017"
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - apinetwork
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    networks:
+      - apinetwork
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+
+volumes:
+  mongodb_data_container:
+
+networks:
+  apinetwork:
+    name: apinetwork-network
+    driver: bridge
