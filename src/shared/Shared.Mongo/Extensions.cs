@@ -26,7 +26,7 @@ public static class Extensions {
 
         services.AddTransient(sp => {
             var client = sp.GetRequiredService<IMongoClient>();
-            return client.GetDatabase(options.DatabaseName);
+            return client.GetDatabase(options.Database);
         });
 
         services.AddInitializer<MongoInitializer>();

@@ -1,4 +1,5 @@
 
+using System.Net.Http.Json;
 using System.Text.Json;
 
 public sealed class ProximityClient : IDisposable {
@@ -17,6 +18,31 @@ public sealed class ProximityClient : IDisposable {
 
         var str = await response.Content.ReadAsStringAsync();
         return str;
+    }
+
+    public Task<HttpResponseMessage> CreateBusinessAsync(CreateBusinessRequest request) {
+        return _httpClient.PostAsJsonAsync("/api/businesses", request, _jsonOptions);
+    }
+
+    public Task<HttpResponseMessage> GetBusinessAsync(string businessId) {
+        return _httpClient.GetAsync($"/api/businesses/{businessId}");
+    }
+
+    public Task<HttpResponseMessage> UpdateBusinessAsync(string businessId, UpdateBusinessRequest request) {
+        return _httpClient.PutAsJsonAsync($"/api/businesses/{businessId}", request, _jsonOptions);
+    }
+
+    public Task<HttpResponseMessage> DeleteBusinessAsync(string businessId) {
+        return _httpClient.DeleteAsync($"/api/businesses/{businessId}");
+    }
+
+    public async Task<BusinessResponse?> ReadBusinessAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<BusinessResponse>(content, _jsonOptions);
     }
 
     public void Dispose() {

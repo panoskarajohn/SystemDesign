@@ -16,11 +16,10 @@ public class ProximityTestFixture : IAsyncLifetime {
     }
 
     public async Task InitializeAsync() {
-        var process = Process.Start("docker", "compose up -d");
+        var process = Process.Start("docker", "compose up -d --build");
         await process.WaitForExitAsync();
 
         this.ProximityClient = new ProximityClient(ProximityBaseUrl);
-
         var healthy = await ProximityClient.GetHealthAsync();
         Assert.Equal("healthy", healthy);
     }
