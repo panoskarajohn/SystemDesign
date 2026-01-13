@@ -111,4 +111,67 @@ public class BusinessEndpointsTests {
         var getResponse = await _proximityClient.GetBusinessAsync(businessId);
         Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
     }
+
+    [Fact]
+    public async Task SearchBusinessesShouldRespectRadius() {
+        // Arrange
+        var denverBusinessId = $"biz-{Guid.NewGuid():N}";
+        var boulderBusinessId = $"biz-{Guid.NewGuid():N}";
+
+        const double denverLat = 39.7392;
+        const double denverLng = -104.9903;
+
+        const double boulderLat = 40.01499;
+        const double boulderLng = -105.27055;
+
+        const string searchRadius = "2km";
+
+        var denverBusinessRequest = new CreateBusinessRequest(
+            denverBusinessId,
+            "100 First St",
+            "Denver",
+            "CO",
+            "USA",
+            denverLat,
+            denverLng
+        );
+
+        var boulderBusinessRequest = new CreateBusinessRequest(
+            boulderBusinessId,
+            "200 Second St",
+            "Boulder",
+            "CO",
+            "USA",
+            boulderLat,
+            boulderLng
+        );
+
+        try {
+            // Act: create test data
+            var denverCreateResponse = await _proximityClient.CreateBusinessAsync(denverBusinessRequest);
+            var boulderCreateResponse = await _proximityClient.CreateBusinessAsync(boulderBusinessRequest);
+
+            Assert.Equal(HttpStatusCode.Created, denverCreateResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Created, boulderCreateResponse.StatusCode);
+
+            // Act: search near Denver
+            var searchHttpResponse = await _proximityClient.SearchBusinessesAsync(
+                denverLat,
+                denverLng,
+                searchRadius
+            );
+
+            Assert.Equal(HttpStatusCode.OK, searchHttpResponse.StatusCode);
+
+            var nearbyBusinesses = await _proximityClient.ReadBusinessesAsync(searchHttpResponse);
+
+            // Assert
+            Assert.Contains(nearbyBusinesses, b => b.BusinessId == denverBusinessId);
+            Assert.DoesNotContain(nearbyBusinesses, b => b.BusinessId == boulderBusinessId);
+        }
+        finally {
+            await _proximityClient.DeleteBusinessAsync(denverBusinessId);
+            await _proximityClient.DeleteBusinessAsync(boulderBusinessId);
+        }
+    }
 }
