@@ -36,6 +36,13 @@ public sealed class ProximityClient : IDisposable {
         return _httpClient.DeleteAsync($"/api/businesses/{businessId}");
     }
 
+    public Task<HttpResponseMessage> SearchBusinessesAsync(double latitude, double longtitude, string radius) {
+        var latitudeValue = latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var longtitudeValue = longtitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var query = $"/api/search?latitude={latitudeValue}&longtitude={longtitudeValue}&radius={Uri.EscapeDataString(radius)}";
+        return _httpClient.GetAsync(query);
+    }
+
     public async Task<BusinessResponse?> ReadBusinessAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content)) {
@@ -43,6 +50,16 @@ public sealed class ProximityClient : IDisposable {
         }
 
         return JsonSerializer.Deserialize<BusinessResponse>(content, _jsonOptions);
+    }
+
+    public async Task<IReadOnlyList<BusinessResponse>> ReadBusinessesAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return Array.Empty<BusinessResponse>();
+        }
+
+        return JsonSerializer.Deserialize<List<BusinessResponse>>(content, _jsonOptions)
+            ?? Array.Empty<BusinessResponse>().ToList();
     }
 
     public void Dispose() {
