@@ -28,7 +28,7 @@ public class ProximityTestFixture : IAsyncLifetime {
                 Assert.Equal("healthy", healthy);
             }
             catch (Exception) {
-                // Do nothing
+                await Task.Delay(100);
             }
         }
     }
