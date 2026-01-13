@@ -1,4 +1,5 @@
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver.GeoJsonObjectModel;
 using Shared.Mongo;
 
 namespace Proximity.Api.Businesses;
@@ -11,6 +12,5 @@ public sealed record Business : IIdentifiable<string> {
     public string City { get; init; } = string.Empty;
     public string State { get; init; } = string.Empty;
     public string Country { get; init; } = string.Empty;
-    public double Latitude { get; init; }
-    public double Longtitude { get; init; }
+    public GeoJsonPoint<GeoJson2DGeographicCoordinates> Location { get; init; } = null!;
 }

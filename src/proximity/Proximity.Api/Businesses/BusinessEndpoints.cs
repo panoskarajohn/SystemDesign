@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using MongoDB.Driver.GeoJsonObjectModel;
 using Shared.Mongo.Repositories;
 
 namespace Proximity.Api.Businesses;
@@ -21,8 +22,7 @@ public static class BusinessEndpoints {
                     City = request.City,
                     State = request.State,
                     Country = request.Country,
-                    Latitude = request.Latitude,
-                    Longtitude = request.Longtitude
+                    Location = toPoint(request.Latitude, request.Longtitude)
                 };
 
                 await repository.AddAsync(business);
@@ -47,8 +47,7 @@ public static class BusinessEndpoints {
                     City = request.City,
                     State = request.State,
                     Country = request.Country,
-                    Latitude = request.Latitude,
-                    Longtitude = request.Longtitude
+                    Location = toPoint(request.Latitude, request.Longtitude)
                 };
 
                 await repository.UpdateAsync(updated);
@@ -76,7 +75,10 @@ public static class BusinessEndpoints {
         business.City,
         business.State,
         business.Country,
-        business.Latitude,
-        business.Longtitude
+        business.Location?.Coordinates.Latitude ?? 0,
+        business.Location?.Coordinates.Longitude ?? 0
     );
+
+    private static GeoJsonPoint<GeoJson2DGeographicCoordinates> toPoint(double latitude, double longitude)
+        => new(new GeoJson2DGeographicCoordinates(longitude, latitude));
 }
