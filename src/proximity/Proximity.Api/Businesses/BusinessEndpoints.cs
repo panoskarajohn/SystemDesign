@@ -82,7 +82,6 @@ public static class BusinessEndpoints {
                         return Results.BadRequest(new { message = "Radius must be one of: 0.5km, 1km, 2km, 5km, 20km." });
                     }
 
-                    var center = new GeoJson2DGeographicCoordinates(longtitude, latitude);
                     var radiusRadians = radiusKm / EarthRadiusKm;
                     var geoFilter = Builders<Business>.Filter.GeoWithinCenterSphere(
                         b => b.Location,
