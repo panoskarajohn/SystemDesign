@@ -174,4 +174,184 @@ public class BusinessEndpointsTests {
             await _proximityClient.DeleteBusinessAsync(boulderBusinessId);
         }
     }
+
+    [Fact]
+    public async Task SearchBusinesses_GeohashBoundaryExample_AcrossPrimeMeridianStillReturnedWithinRadius() {
+        // Arrange: two points ~150m apart, but on opposite sides of longitude 0 (Prime Meridian).
+        var eastOfMeridianBusinessId = $"biz-{Guid.NewGuid():N}";
+        var westOfMeridianBusinessId = $"biz-{Guid.NewGuid():N}";
+
+        const double centerLat = 51.5000;
+
+        // East of 0° lon
+        const double eastLng = 0.0010;
+
+        // West of 0° lon
+        const double westLng = -0.0010;
+
+        const string searchRadius = "1km";
+
+        var eastRequest = new CreateBusinessRequest(
+            eastOfMeridianBusinessId,
+            "10 East St",
+            "London",
+            "N/A",
+            "UK",
+            centerLat,
+            eastLng
+        );
+
+        var westRequest = new CreateBusinessRequest(
+            westOfMeridianBusinessId,
+            "20 West St",
+            "London",
+            "N/A",
+            "UK",
+            centerLat,
+            westLng
+        );
+
+        try {
+            var createEast = await _proximityClient.CreateBusinessAsync(eastRequest);
+            var createWest = await _proximityClient.CreateBusinessAsync(westRequest);
+
+            Assert.Equal(HttpStatusCode.Created, createEast.StatusCode);
+            Assert.Equal(HttpStatusCode.Created, createWest.StatusCode);
+
+            // Act: search from the east-side point
+            var searchHttpResponse = await _proximityClient.SearchBusinessesAsync(
+                centerLat,
+                eastLng,
+                searchRadius
+            );
+
+            Assert.Equal(HttpStatusCode.OK, searchHttpResponse.StatusCode);
+
+            var results = await _proximityClient.ReadBusinessesAsync(searchHttpResponse);
+
+            const int geohashPrecision = 3;
+
+            // Assert: both should be within 1km and returned.
+            Assert.Contains(results, b => b.BusinessId == eastOfMeridianBusinessId);
+            Assert.Contains(results, b => b.BusinessId == westOfMeridianBusinessId);
+
+            // (These prefixes differ even though the points are very close.)
+            var eastHash4 = encodeGeohash(centerLat, eastLng, precision: geohashPrecision);
+            var westHash4 = encodeGeohash(centerLat, westLng, precision: geohashPrecision);
+            var (farLat, farLng) = findPointWithSameGeohashPrefix(
+                baseLat: centerLat,
+                baseLon: eastLng,
+                precision: geohashPrecision,
+                minDistanceKm: 25,
+                maxDistanceKm: 200,
+                stepKm: 1
+            );
+
+            var farHash4 = encodeGeohash(farLat, farLng, geohashPrecision);
+
+            var nearDistanceKm = haversineKm(centerLat, eastLng, centerLat, westLng);
+            var farDistanceKm = haversineKm(centerLat, eastLng, farLat, farLng);
+
+            // Sanity checks: near is near; far is far
+            Assert.True(nearDistanceKm < 0.5, $"Near points are {nearDistanceKm:F2}km apart");
+            // -0.05 is just for precision issues farDistance will be ~25
+            Assert.True(farDistanceKm >= 25 - 0.05, $"Far point is only {farDistanceKm:F2}km away");
+
+            // Geohash boundary + false positives demonstration:
+            Assert.NotEqual(eastHash4, westHash4);   // close but different cell (boundary)
+            Assert.Equal(eastHash4, farHash4);
+        }
+        finally {
+            await _proximityClient.DeleteBusinessAsync(eastOfMeridianBusinessId);
+            await _proximityClient.DeleteBusinessAsync(westOfMeridianBusinessId);
+        }
+    }
+    private static (double lat, double lon) findPointWithSameGeohashPrefix(
+    double baseLat,
+    double baseLon,
+    int precision,
+    double minDistanceKm,
+    double maxDistanceKm,
+    double stepKm) {
+        // Walk eastward until we find a point that:
+        // - shares the same geohash prefix
+        // - is at least minDistanceKm away (and not beyond maxDistanceKm)
+        var baseHash = encodeGeohash(baseLat, baseLon, precision);
+
+        // Convert step in km to degrees longitude at this latitude
+        double KmToLonDeg(double km)
+            => km / (111.32 * Math.Cos(baseLat * Math.PI / 180.0));
+
+        for (double dKm = minDistanceKm; dKm <= maxDistanceKm; dKm += stepKm) {
+            var candidateLon = baseLon + KmToLonDeg(dKm);
+            var candidateHash = encodeGeohash(baseLat, candidateLon, precision);
+
+            if (candidateHash == baseHash) {
+                return (baseLat, candidateLon);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Could not find a point within {maxDistanceKm}km that shares geohash({precision}) with the base point.");
+    }
+
+
+
+
+    // Minimal geohash encoder for test verification
+    private static readonly char[] GeoHashBase32 = "0123456789bcdefghjkmnpqrstuvwxyz".ToCharArray();
+
+    private static string encodeGeohash(double latitude, double longitude, int precision) {
+        var latMin = -90.0; var latMax = 90.0;
+        var lonMin = -180.0; var lonMax = 180.0;
+
+        int bit = 0;
+        int ch = 0;
+        bool even = true;
+
+        var bits = new[] { 16, 8, 4, 2, 1 };
+        var hash = new char[precision];
+        int idx = 0;
+
+        while (idx < precision) {
+            if (even) {
+                var mid = (lonMin + lonMax) / 2;
+                if (longitude >= mid) { ch |= bits[bit]; lonMin = mid; }
+                else { lonMax = mid; }
+            }
+            else {
+                var mid = (latMin + latMax) / 2;
+                if (latitude >= mid) { ch |= bits[bit]; latMin = mid; }
+                else { latMax = mid; }
+            }
+
+            even = !even;
+
+            if (bit < 4) bit++;
+            else {
+                hash[idx++] = GeoHashBase32[ch];
+                bit = 0;
+                ch = 0;
+            }
+        }
+
+        return new string(hash);
+    }
+    private const double EarthRadiusKm = 6378.137;
+
+    private static double haversineKm(double lat1, double lon1, double lat2, double lon2) {
+        static double ToRad(double deg) => deg * Math.PI / 180.0;
+
+        var dLat = ToRad(lat2 - lat1);
+        var dLon = ToRad(lon2 - lon1);
+
+        var a = Math.Pow(Math.Sin(dLat / 2), 2) +
+                Math.Cos(ToRad(lat1)) * Math.Cos(ToRad(lat2)) *
+                Math.Pow(Math.Sin(dLon / 2), 2);
+
+        var c = 2 * Math.Asin(Math.Min(1, Math.Sqrt(a)));
+        return EarthRadiusKm * c;
+    }
+
+
 }

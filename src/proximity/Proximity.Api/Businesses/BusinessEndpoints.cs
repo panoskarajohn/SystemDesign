@@ -83,6 +83,7 @@ public static class BusinessEndpoints {
                     }
 
                     var radiusRadians = radiusKm / EarthRadiusKm;
+                    // Geohash
                     var geoFilter = Builders<Business>.Filter.GeoWithinCenterSphere(
                         b => b.Location,
                         longtitude,
