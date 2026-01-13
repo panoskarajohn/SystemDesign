@@ -6,12 +6,13 @@ public class ProximityTestCollection : ICollectionFixture<ProximityTestFixture> 
 }
 
 public class ProximityTestFixture : IAsyncLifetime {
-    private const string ProximityBaseUrl = "http://localhost:5000";
+    private const string ProximityBaseUrl = "http://localhost:1000";
     public ProximityClient ProximityClient { get; set; } = null!;
 
     public async Task DisposeAsync() {
-        var process = Process.Start("docker", "compose down");
-        await process.WaitForExitAsync();
+        //var process = Process.Start("docker", "compose down");
+        //await process.WaitForExitAsync();
+        await Task.Yield();
     }
 
     public async Task InitializeAsync() {

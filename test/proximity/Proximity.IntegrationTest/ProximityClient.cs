@@ -15,8 +15,8 @@ public sealed class ProximityClient : IDisposable {
     public async Task<string> GetHealthAsync() {
         var response = await _httpClient.GetAsync("/api/health");
 
-        var json = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<string>(json, _jsonOptions)!;
+        var str = await response.Content.ReadAsStringAsync();
+        return str;
     }
 
     public void Dispose() {

@@ -13,6 +13,6 @@ var app = builder.Build();
 app.UseApplication();
 app.UseLogging();
 
-app.MapGet("/health", () => "healthy");
+app.MapGet("/api/health", () => "healthy");
 
 app.Run();
