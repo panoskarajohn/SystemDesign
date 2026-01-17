@@ -11,6 +11,7 @@ services.AddApplication(configuration);
 services.AddMongo(configuration);
 services.AddMongoRepository<Business, string>("business");
 services.AddInitializer<DevelopmentDatabaseInitializer>();
+services.AddInitializer<BusinessIndexInitializer>();
 
 var host = builder.Host;
 host.UseLogging();
