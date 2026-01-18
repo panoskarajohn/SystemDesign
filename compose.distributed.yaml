@@ -1,0 +1,25 @@
+services:
+  proximity.api:
+    image: proximity.api
+    build:
+      context: .
+      dockerfile: src/proximity/Proximity.Api/Dockerfile
+    container_name: proximity-api
+    ports:
+      - "1000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Distributed
+      ASPNETCORE_URLS: "http://+:8080"
+    networks:
+      - mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  mongo:
+    external: true
+    name: mongo-network
+    driver: bridge
