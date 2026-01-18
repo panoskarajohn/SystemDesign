@@ -4,16 +4,39 @@ services:
     container_name: mongo-setup
     depends_on:
       - configsvr
+      - configsvr-init
       - mongos
       # add your shard services here too, e.g.
       - shard1
+      - shard1-init
       - shard2
+      - shard2-init
       - shard3
+      - shard3-init
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGOS_HOST: 127.0.0.1
     volumes:
       - ./init:/scripts:ro
     entrypoint: ["/bin/bash", "/scripts/00-setup.sh"]
-    networks:
-      - mongo
+    network_mode: "service:mongos"
+    restart: "no"
+
+  configsvr-init:
+    image: mongo:latest
+    container_name: mongo-configsvr-init
+    depends_on:
+      - configsvr
+    volumes:
+      - ./init:/scripts:ro
+    network_mode: "service:configsvr"
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "until mongosh --host 127.0.0.1 --port 27019 --quiet --eval \"db.adminCommand('ping').ok\" 2>/dev/null | grep -q 1; do sleep 1; done; mongosh --host 127.0.0.1 --port 27019 --quiet /scripts/rs-config.js",
+      ]
     restart: "no"
 
   configsvr:
@@ -28,12 +51,32 @@ services:
         "--port",
         "27019",
         "--bind_ip_all",
+        "--keyFile",
+        "/etc/mongo-keyfile",
+        "--auth",
       ]
     volumes:
       - configsvr_data:/data/db
       - configsvr_config:/data/configdb
+      - ./init/mongo-keyfile:/etc/mongo-keyfile
     networks:
       - mongo
+
+  shard1-init:
+    image: mongo:latest
+    container_name: mongo-shard-1-init
+    depends_on:
+      - shard1
+    volumes:
+      - ./init:/scripts:ro
+    network_mode: "service:shard1"
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "until mongosh --host 127.0.0.1 --port 27017 --quiet --eval \"db.adminCommand('ping').ok\" 2>/dev/null | grep -q 1; do sleep 1; done; mongosh --host 127.0.0.1 --port 27017 --quiet /scripts/rs-shard-1.js",
+      ]
+    restart: "no"
 
   shard1:
     image: mongo:latest
@@ -47,11 +90,31 @@ services:
         "--port",
         "27017",
         "--bind_ip_all",
+        "--keyFile",
+        "/etc/mongo-keyfile",
+        "--auth",
       ]
     volumes:
       - shard1_data:/data/db
+      - ./init/mongo-keyfile:/etc/mongo-keyfile
     networks:
       - mongo
+
+  shard2-init:
+    image: mongo:latest
+    container_name: mongo-shard-2-init
+    depends_on:
+      - shard2
+    volumes:
+      - ./init:/scripts:ro
+    network_mode: "service:shard2"
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "until mongosh --host 127.0.0.1 --port 27017 --quiet --eval \"db.adminCommand('ping').ok\" 2>/dev/null | grep -q 1; do sleep 1; done; mongosh --host 127.0.0.1 --port 27017 --quiet /scripts/rs-shard-2.js",
+      ]
+    restart: "no"
 
   shard2:
     image: mongo:latest
@@ -65,11 +128,31 @@ services:
         "--port",
         "27017",
         "--bind_ip_all",
+        "--keyFile",
+        "/etc/mongo-keyfile",
+        "--auth",
       ]
     volumes:
       - shard2_data:/data/db
+      - ./init/mongo-keyfile:/etc/mongo-keyfile
     networks:
       - mongo
+
+  shard3-init:
+    image: mongo:latest
+    container_name: mongo-shard-3-init
+    depends_on:
+      - shard3
+    volumes:
+      - ./init:/scripts:ro
+    network_mode: "service:shard3"
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "until mongosh --host 127.0.0.1 --port 27017 --quiet --eval \"db.adminCommand('ping').ok\" 2>/dev/null | grep -q 1; do sleep 1; done; mongosh --host 127.0.0.1 --port 27017 --quiet /scripts/rs-shard-3.js",
+      ]
+    restart: "no"
 
   shard3:
     image: mongo:latest
@@ -83,9 +166,13 @@ services:
         "--port",
         "27017",
         "--bind_ip_all",
+        "--keyFile",
+        "/etc/mongo-keyfile",
+        "--auth",
       ]
     volumes:
       - shard3_data:/data/db
+      - ./init/mongo-keyfile:/etc/mongo-keyfile
     networks:
       - mongo
 
@@ -102,13 +189,30 @@ services:
         "--bind_ip_all",
         "--port",
         "27017",
+        "--keyFile",
+        "/etc/mongo-keyfile",
       ]
     ports:
       - "27017:27017"
+    volumes:
+      - ./init/mongo-keyfile:/etc/mongo-keyfile
     networks:
       - mongo
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--username",
+          "root",
+          "--password",
+          "rootpassword",
+          "--authenticationDatabase",
+          "admin",
+          "--quiet",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
