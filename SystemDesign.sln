@@ -35,7 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nearby.Api", "src\nearbyfri
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nearbyfriends", "nearbyfriends", "{7A98F42D-7527-43A8-A93B-19D29F263B19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NearbyFriends.IntegrationTest", "test\nearbyfriends\NearbyFriends.IntegrationTest.csproj", "{C3AB8B2D-40D4-475D-8A9C-44389ED1BF47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NearbyFriends.IntegrationTest", "test\nearbyfriends\NearbyFriends.IntegrationTest\NearbyFriends.IntegrationTest.csproj", "{C3AB8B2D-40D4-475D-8A9C-44389ED1BF47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
