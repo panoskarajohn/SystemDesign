@@ -22,6 +22,28 @@
       timeout: 5s
       retries: 5
 
+  nearby.api:
+    image: nearby.api
+    build:
+      context: .
+      dockerfile: src/nearbyfriends/Dockerfile
+    container_name: nearbyfriends-api
+    ports:
+      - "1001:8080"
+    environment:
+      postgres__ConnectionString: "Host=postgres;Port=5432;Database=nearbyfriends;Username=postgres;Password=postgres"
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:8080"
+    depends_on:
+      - postgres
+    networks:
+      - apinetwork
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   mongodb:
     image: mongo:latest
     restart: unless-stopped
