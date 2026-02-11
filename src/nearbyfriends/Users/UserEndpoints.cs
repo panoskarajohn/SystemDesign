@@ -103,6 +103,17 @@ public static class UserEndpoints {
             return Results.Created($"/api/users/{userId}", new { userId, friendId });
         }).WithName("AddFriend");
 
+        group.MapDelete("{userId:guid}", async (Guid userId, NearbyFriendsDbContext dbContext, CancellationToken cancellationToken) => {
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+            if (user is null) {
+                return Results.NotFound();
+            }
+
+            dbContext.Users.Remove(user);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return Results.NoContent();
+        }).WithName("DeleteUser");
+
         return endpoints;
     }
 

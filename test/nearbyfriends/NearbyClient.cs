@@ -35,6 +35,10 @@ public sealed class NearbyClient : IDisposable {
         return _httpClient.PostAsync($"/api/users/{userId}/friends/{friendId}", content: null);
     }
 
+    public Task<HttpResponseMessage> DeleteUserAsync(Guid userId) {
+        return _httpClient.DeleteAsync($"/api/users/{userId}");
+    }
+
     public async Task<UserResponse?> ReadUserAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content)) {
