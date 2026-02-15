@@ -1,4 +1,4 @@
-namespace Nearby.Api.Users;
+namespace NearbyFriends.Api.Users;
 
 public record CreateUserRequest(string Username, string DisplayName);
 

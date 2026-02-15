@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Nearby.Api.Users;
+using NearbyFriends.Api.Users;
 
-namespace Nearby.Api.Persistence;
+namespace NearbyFriends.Api.Persistence;
 
 public sealed class NearbyFriendsDbContext : DbContext {
     public NearbyFriendsDbContext(DbContextOptions<NearbyFriendsDbContext> options) : base(options) {

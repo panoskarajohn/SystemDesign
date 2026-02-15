@@ -1,5 +1,5 @@
-using Nearby.Api.Persistence;
-using Nearby.Api.Users;
+using NearbyFriends.Api.Persistence;
+using NearbyFriends.Api.Users;
 using Shared.Postgres;
 
 var builder = WebApplication.CreateBuilder(args);

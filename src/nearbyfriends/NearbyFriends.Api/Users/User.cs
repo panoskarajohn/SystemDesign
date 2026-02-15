@@ -1,4 +1,4 @@
-namespace Nearby.Api.Users;
+namespace NearbyFriends.Api.Users;
 
 public sealed class User {
     public Guid Id { get; set; }

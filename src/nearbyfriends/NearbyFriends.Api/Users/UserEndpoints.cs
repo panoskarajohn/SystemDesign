@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Nearby.Api.Persistence;
+using NearbyFriends.Api.Persistence;
 
-namespace Nearby.Api.Users;
+namespace NearbyFriends.Api.Users;
 
 public static class UserEndpoints {
     public static IEndpointRouteBuilder MapUserEndpoints(this IEndpointRouteBuilder endpoints) {
