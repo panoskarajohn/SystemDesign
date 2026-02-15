@@ -10,13 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\.dockerignore">
+    <Content Include="..\..\..\.dockerignore">
       <Link>.dockerignore</Link>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\shared\Shared.Postgres\Shared.Postgres.csproj" />
+    <ProjectReference Include="..\..\shared\Shared.Postgres\Shared.Postgres.csproj" />
   </ItemGroup>
 
 </Project>

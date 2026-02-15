@@ -26,7 +26,7 @@
     image: nearby.api
     build:
       context: .
-      dockerfile: src/nearbyfriends/Dockerfile
+      dockerfile: src/nearbyfriends/NearbyFriends.Api/Dockerfile
     container_name: nearbyfriends-api
     ports:
       - "1001:8080"

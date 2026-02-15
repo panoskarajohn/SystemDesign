@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Postgres", "src\shar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nearbyfriends", "nearbyfriends", "{F9D65990-75DC-452C-BF26-1BDBED60EA78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nearby.Api", "src\nearbyfriends\Nearby.Api.csproj", "{4DEF558E-B7B4-4F82-98A0-3EE2C0203435}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NearbyFriends.Api", "src\nearbyfriends\NearbyFriends.Api\NearbyFriends.Api.csproj", "{4DEF558E-B7B4-4F82-98A0-3EE2C0203435}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nearbyfriends", "nearbyfriends", "{7A98F42D-7527-43A8-A93B-19D29F263B19}"
 EndProject
