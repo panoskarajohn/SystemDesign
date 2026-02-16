@@ -39,6 +39,14 @@ public sealed class NearbyClient : IDisposable {
         return _httpClient.DeleteAsync($"/api/users/{userId}");
     }
 
+    public Task<HttpResponseMessage> UpdateUserLocationAsync(Guid userId, UpdateUserLocationRequest request) {
+        return _httpClient.PostAsJsonAsync($"/api/users/{userId}/location", request, _jsonOptions);
+    }
+
+    public Task<HttpResponseMessage> GetUserLocationAsync(Guid userId) {
+        return _httpClient.GetAsync($"/api/users/{userId}/location");
+    }
+
     public async Task<UserResponse?> ReadUserAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content)) {
@@ -46,6 +54,24 @@ public sealed class NearbyClient : IDisposable {
         }
 
         return JsonSerializer.Deserialize<UserResponse>(content, _jsonOptions);
+    }
+
+    public async Task<UpdateUserLocationResponse?> ReadUpdatedUserLocationAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<UpdateUserLocationResponse>(content, _jsonOptions);
+    }
+
+    public async Task<UserLocationResponse?> ReadUserLocationAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<UserLocationResponse>(content, _jsonOptions);
     }
 
     public void Dispose() {

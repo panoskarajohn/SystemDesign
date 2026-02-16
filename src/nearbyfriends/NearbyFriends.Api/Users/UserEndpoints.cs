@@ -159,6 +159,38 @@ public static class UserEndpoints {
             return Results.Accepted($"/api/users/{userId}/location", response);
         }).WithName("UpdateUserLocation");
 
+        group.MapGet("{userId:guid}/location", async (
+            Guid userId,
+            NearbyFriendsDbContext dbContext,
+            IConnectionMultiplexer multiplexer,
+            CancellationToken cancellationToken) => {
+            var userExists = await dbContext.Users.AnyAsync(x => x.Id == userId, cancellationToken);
+            if (!userExists) {
+                return Results.NotFound(new { message = "User not found." });
+            }
+
+            var key = $"users:location:{userId}";
+            var redisDatabase = multiplexer.GetDatabase();
+            var locationJson = await redisDatabase.StringGetAsync(key).ConfigureAwait(false);
+
+            if (locationJson.IsNullOrEmpty) {
+                return Results.NotFound(new { message = "Location not found." });
+            }
+
+            var message = JsonSerializer.Deserialize<UserLocationUpdatedMessage>(locationJson!);
+            if (message is null) {
+                return Results.Problem("Stored location payload is invalid.");
+            }
+
+            var response = new UserLocationResponse(
+                message.UserId,
+                message.Latitude,
+                message.Longitude,
+                message.UpdatedAtUtc);
+
+            return Results.Ok(response);
+        }).WithName("GetUserLocation");
+
         return endpoints;
     }
 

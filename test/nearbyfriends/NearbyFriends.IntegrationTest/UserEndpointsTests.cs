@@ -128,4 +128,46 @@ public class UserEndpointsTests {
             }
         }
     }
+
+    [Fact]
+    public async Task UpdateAndGetUserLocationShouldSucceed() {
+        Guid? userId = null;
+        var createRequest = new CreateUserRequest(
+            $"user-{Guid.NewGuid():N}",
+            "Location User"
+        );
+
+        try {
+            var createResponse = await _nearbyClient.CreateUserAsync(createRequest);
+            Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+            var createdUser = await _nearbyClient.ReadUserAsync(createResponse);
+            Assert.NotNull(createdUser);
+            userId = createdUser!.UserId;
+
+            var updateLocationRequest = new UpdateUserLocationRequest(37.9838, 23.7275);
+            var updateLocationResponse = await _nearbyClient.UpdateUserLocationAsync(createdUser.UserId, updateLocationRequest);
+            Assert.Equal(HttpStatusCode.Accepted, updateLocationResponse.StatusCode);
+
+            var updatedLocation = await _nearbyClient.ReadUpdatedUserLocationAsync(updateLocationResponse);
+            Assert.NotNull(updatedLocation);
+            Assert.Equal(createdUser.UserId, updatedLocation!.UserId);
+            Assert.Equal(updateLocationRequest.Latitude, updatedLocation.Latitude);
+            Assert.Equal(updateLocationRequest.Longitude, updatedLocation.Longitude);
+
+            var getLocationResponse = await _nearbyClient.GetUserLocationAsync(createdUser.UserId);
+            Assert.Equal(HttpStatusCode.OK, getLocationResponse.StatusCode);
+
+            var location = await _nearbyClient.ReadUserLocationAsync(getLocationResponse);
+            Assert.NotNull(location);
+            Assert.Equal(createdUser.UserId, location!.UserId);
+            Assert.Equal(updateLocationRequest.Latitude, location.Latitude);
+            Assert.Equal(updateLocationRequest.Longitude, location.Longitude);
+        }
+        finally {
+            if (userId.HasValue) {
+                await _nearbyClient.DeleteUserAsync(userId.Value);
+            }
+        }
+    }
 }

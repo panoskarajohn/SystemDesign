@@ -14,3 +14,9 @@ public record UpdateUserLocationResponse(
     double Longitude,
     DateTime UpdatedAtUtc,
     long PublishedToSubscribers);
+
+public record UserLocationResponse(
+    Guid UserId,
+    double Latitude,
+    double Longitude,
+    DateTime UpdatedAtUtc);
