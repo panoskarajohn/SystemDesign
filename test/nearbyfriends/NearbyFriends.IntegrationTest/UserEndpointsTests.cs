@@ -170,4 +170,85 @@ public class UserEndpointsTests {
             }
         }
     }
+
+    [Fact]
+    public async Task SubscribeToFriendLocationUpdatesShouldCreateBidirectionalNearbyFriendResults() {
+        Guid? userAId = null;
+        Guid? userBId = null;
+        var userARequest = new CreateUserRequest(
+            $"user-{Guid.NewGuid():N}",
+            "Nearby User A"
+        );
+        var userBRequest = new CreateUserRequest(
+            $"user-{Guid.NewGuid():N}",
+            "Nearby User B"
+        );
+
+        try {
+            var createAResponse = await _nearbyClient.CreateUserAsync(userARequest);
+            var createBResponse = await _nearbyClient.CreateUserAsync(userBRequest);
+            Assert.Equal(HttpStatusCode.Created, createAResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Created, createBResponse.StatusCode);
+
+            var userA = await _nearbyClient.ReadUserAsync(createAResponse);
+            var userB = await _nearbyClient.ReadUserAsync(createBResponse);
+            Assert.NotNull(userA);
+            Assert.NotNull(userB);
+            userAId = userA!.UserId;
+            userBId = userB!.UserId;
+
+            var addFriendResponse = await _nearbyClient.AddFriendAsync(userA.UserId, userB.UserId);
+            Assert.Equal(HttpStatusCode.Created, addFriendResponse.StatusCode);
+
+            var subscribeResponse = await _nearbyClient.SubscribeToFriendLocationUpdatesAsync(userA.UserId, userB.UserId);
+            Assert.Equal(HttpStatusCode.Created, subscribeResponse.StatusCode);
+            var subscribePayload = await _nearbyClient.ReadSubscribeToFriendLocationUpdatesResponseAsync(subscribeResponse);
+            Assert.NotNull(subscribePayload);
+            Assert.Equal(userA.UserId, subscribePayload!.UserId);
+            Assert.Equal(userB.UserId, subscribePayload.FriendId);
+            Assert.Equal(2, subscribePayload.CreatedSubscriptions);
+
+            var userALocation = new UpdateUserLocationRequest(40.6401, 22.9444);
+            var userBLocation = new UpdateUserLocationRequest(40.6408, 22.9451);
+            var updateAResponse = await _nearbyClient.UpdateUserLocationAsync(userA.UserId, userALocation);
+            var updateBResponse = await _nearbyClient.UpdateUserLocationAsync(userB.UserId, userBLocation);
+            var updateASecondResponse = await _nearbyClient.UpdateUserLocationAsync(userA.UserId, userALocation);
+            Assert.Equal(HttpStatusCode.Accepted, updateAResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Accepted, updateBResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Accepted, updateASecondResponse.StatusCode);
+
+            var hasBothLinks = false;
+            for (var attempt = 0; attempt < 40; attempt++) {
+                var nearbyForAResponse = await _nearbyClient.GetNearbyFriendsAsync(userA.UserId);
+                var nearbyForBResponse = await _nearbyClient.GetNearbyFriendsAsync(userB.UserId);
+                Assert.Equal(HttpStatusCode.OK, nearbyForAResponse.StatusCode);
+                Assert.Equal(HttpStatusCode.OK, nearbyForBResponse.StatusCode);
+
+                var nearbyForA = await _nearbyClient.ReadNearbyFriendsResponseAsync(nearbyForAResponse);
+                var nearbyForB = await _nearbyClient.ReadNearbyFriendsResponseAsync(nearbyForBResponse);
+                Assert.NotNull(nearbyForA);
+                Assert.NotNull(nearbyForB);
+
+                var hasAToB = nearbyForA!.NearbyFriendIds.Contains(userB.UserId);
+                var hasBToA = nearbyForB!.NearbyFriendIds.Contains(userA.UserId);
+                if (hasAToB && hasBToA) {
+                    hasBothLinks = true;
+                    break;
+                }
+
+                await Task.Delay(250);
+            }
+
+            Assert.True(hasBothLinks, "Expected both users to appear in each other's nearby-friends endpoint.");
+        }
+        finally {
+            if (userAId.HasValue) {
+                await _nearbyClient.DeleteUserAsync(userAId.Value);
+            }
+
+            if (userBId.HasValue) {
+                await _nearbyClient.DeleteUserAsync(userBId.Value);
+            }
+        }
+    }
 }

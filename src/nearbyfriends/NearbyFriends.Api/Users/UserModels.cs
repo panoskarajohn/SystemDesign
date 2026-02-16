@@ -20,3 +20,13 @@ public record UserLocationResponse(
     double Latitude,
     double Longitude,
     DateTime UpdatedAtUtc);
+
+public record SubscribeToFriendLocationUpdatesResponse(
+    Guid UserId,
+    Guid FriendId,
+    int CreatedSubscriptions,
+    DateTime SubscribedAtUtc);
+
+public record NearbyFriendsResponse(
+    Guid UserId,
+    IReadOnlyCollection<Guid> NearbyFriendIds);

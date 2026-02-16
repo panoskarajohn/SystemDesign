@@ -8,6 +8,8 @@ WORKDIR /src
 
 COPY ["src/redispubsub/RedisPubSub/RedisPubSub.csproj", "src/redispubsub/RedisPubSub/"]
 COPY ["src/shared/Shared.Redis/Shared.Redis.csproj", "src/shared/Shared.Redis/"]
+COPY ["src/shared/Shared.Postgres/Shared.Postgres.csproj", "src/shared/Shared.Postgres/"]
+COPY ["src/shared/Shared.Common/Shared.Common.csproj", "src/shared/Shared.Common/"]
 
 RUN dotnet restore "src/redispubsub/RedisPubSub/RedisPubSub.csproj"
 

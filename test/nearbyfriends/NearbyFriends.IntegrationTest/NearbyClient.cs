@@ -47,6 +47,14 @@ public sealed class NearbyClient : IDisposable {
         return _httpClient.GetAsync($"/api/users/{userId}/location");
     }
 
+    public Task<HttpResponseMessage> SubscribeToFriendLocationUpdatesAsync(Guid userId, Guid friendId) {
+        return _httpClient.PostAsync($"/api/users/{userId}/friends/{friendId}/location/subscriptions", content: null);
+    }
+
+    public Task<HttpResponseMessage> GetNearbyFriendsAsync(Guid userId) {
+        return _httpClient.GetAsync($"/api/users/{userId}/nearby-friends");
+    }
+
     public async Task<UserResponse?> ReadUserAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content)) {
@@ -72,6 +80,24 @@ public sealed class NearbyClient : IDisposable {
         }
 
         return JsonSerializer.Deserialize<UserLocationResponse>(content, _jsonOptions);
+    }
+
+    public async Task<SubscribeToFriendLocationUpdatesResponse?> ReadSubscribeToFriendLocationUpdatesResponseAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<SubscribeToFriendLocationUpdatesResponse>(content, _jsonOptions);
+    }
+
+    public async Task<NearbyFriendsResponse?> ReadNearbyFriendsResponseAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<NearbyFriendsResponse>(content, _jsonOptions);
     }
 
     public void Dispose() {

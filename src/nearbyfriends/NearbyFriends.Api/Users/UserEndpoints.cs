@@ -191,6 +191,104 @@ public static class UserEndpoints {
             return Results.Ok(response);
         }).WithName("GetUserLocation");
 
+        group.MapPost("{userId:guid}/friends/{friendId:guid}/location/subscriptions", async (
+            Guid userId,
+            Guid friendId,
+            NearbyFriendsDbContext dbContext,
+            CancellationToken cancellationToken) => {
+            if (userId == friendId) {
+                return Results.BadRequest(new { message = "A user cannot subscribe to themselves." });
+            }
+
+            var users = await dbContext.Users
+                .Where(x => x.Id == userId || x.Id == friendId)
+                .Select(x => x.Id)
+                .ToListAsync(cancellationToken);
+
+            if (!users.Contains(userId) || !users.Contains(friendId)) {
+                return Results.NotFound(new { message = "Both users must exist." });
+            }
+
+            var friendLinks = await dbContext.UserFriends
+                .Where(x =>
+                    (x.UserId == userId && x.FriendId == friendId) ||
+                    (x.UserId == friendId && x.FriendId == userId))
+                .Select(x => new { x.UserId, x.FriendId })
+                .ToListAsync(cancellationToken);
+
+            var areFriends = friendLinks.Any(x => x.UserId == userId && x.FriendId == friendId)
+                && friendLinks.Any(x => x.UserId == friendId && x.FriendId == userId);
+            if (!areFriends) {
+                return Results.BadRequest(new { message = "Users must be friends to subscribe to location updates." });
+            }
+
+            var existingLinks = await dbContext.UserLocationSubscriptions
+                .Where(x =>
+                    (x.SubscriberUserId == userId && x.TargetUserId == friendId) ||
+                    (x.SubscriberUserId == friendId && x.TargetUserId == userId))
+                .Select(x => new { x.SubscriberUserId, x.TargetUserId })
+                .ToListAsync(cancellationToken);
+
+            var now = DateTime.UtcNow;
+            var created = 0;
+            if (!existingLinks.Any(x => x.SubscriberUserId == userId && x.TargetUserId == friendId)) {
+                dbContext.UserLocationSubscriptions.Add(new UserLocationSubscription {
+                    SubscriberUserId = userId,
+                    TargetUserId = friendId,
+                    CreatedAtUtc = now
+                });
+                created++;
+            }
+
+            if (!existingLinks.Any(x => x.SubscriberUserId == friendId && x.TargetUserId == userId)) {
+                dbContext.UserLocationSubscriptions.Add(new UserLocationSubscription {
+                    SubscriberUserId = friendId,
+                    TargetUserId = userId,
+                    CreatedAtUtc = now
+                });
+                created++;
+            }
+
+            if (created > 0) {
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            var response = new SubscribeToFriendLocationUpdatesResponse(
+                userId,
+                friendId,
+                CreatedSubscriptions: created,
+                SubscribedAtUtc: now);
+
+            return Results.Created($"/api/users/{userId}/friends/{friendId}/location/subscriptions", response);
+        }).WithName("SubscribeToFriendLocationUpdates");
+
+        group.MapGet("{userId:guid}/nearby-friends", async (
+            Guid userId,
+            NearbyFriendsDbContext dbContext,
+            IConnectionMultiplexer multiplexer,
+            CancellationToken cancellationToken) => {
+            var userExists = await dbContext.Users.AnyAsync(x => x.Id == userId, cancellationToken);
+            if (!userExists) {
+                return Results.NotFound(new { message = "User not found." });
+            }
+
+            var redisDatabase = multiplexer.GetDatabase();
+            var members = await redisDatabase.SetMembersAsync("nearby:friends").ConfigureAwait(false);
+            var userPrefix = $"{userId}:";
+
+            var nearbyFriendIds = members
+                .Select(x => (string?)x)
+                .Where(x => !string.IsNullOrWhiteSpace(x) && x!.StartsWith(userPrefix, StringComparison.Ordinal))
+                .Select(x => x![userPrefix.Length..])
+                .Select(x => Guid.TryParse(x, out var friendId) ? friendId : Guid.Empty)
+                .Where(x => x != Guid.Empty)
+                .Distinct()
+                .ToArray();
+
+            var response = new NearbyFriendsResponse(userId, nearbyFriendIds);
+            return Results.Ok(response);
+        }).WithName("GetNearbyFriends");
+
         return endpoints;
     }
 

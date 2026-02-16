@@ -53,10 +53,15 @@
       dockerfile: src/redispubsub/RedisPubSub/Dockerfile
     container_name: redispubsub
     environment:
+      postgres__ConnectionString: "Host=postgres;Port=5432;Database=nearbyfriends;Username=postgres;Password=postgres"
       redis__ConnectionString: "redis:6379"
     depends_on:
+      nearby.api:
+        condition: service_healthy
       redis:
         condition: service_healthy
+      postgres:
+        condition: service_started
     networks:
       - apinetwork
 

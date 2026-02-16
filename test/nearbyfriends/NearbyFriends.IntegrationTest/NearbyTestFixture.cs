@@ -17,6 +17,9 @@ public class NearbyTestFixture : IAsyncLifetime {
     }
 
     public async Task InitializeAsync() {
+        var downProcess = Process.Start("docker", "compose down -v");
+        await downProcess.WaitForExitAsync();
+
         var process = Process.Start("docker", "compose up -d --build");
         await process.WaitForExitAsync();
 
