@@ -1,17 +1,21 @@
 using Microsoft.EntityFrameworkCore;
 using RedisPubSub.Persistence;
 using RedisPubSub.Workers;
+using Shared.Logging;
 using Shared.Postgres;
 using Shared.Redis;
 
-var builder = Host.CreateApplicationBuilder(args);
+var host = Host.CreateDefaultBuilder(args)
+    .UseLogging()
+    .ConfigureServices((context, services) => {
+        var postgresSection = context.Configuration.GetRequiredSection("postgres");
+        var postgresOptions = new PostgresOptions();
+        postgresSection.Bind(postgresOptions);
 
-var postgresSection = builder.Configuration.GetRequiredSection("postgres");
-var postgresOptions = new PostgresOptions();
-postgresSection.Bind(postgresOptions);
-builder.Services.AddDbContext<RedisPubSubDbContext>(options => options.UseNpgsql(postgresOptions.ConnectionString));
-builder.Services.AddRedis(builder.Configuration);
-builder.Services.AddHostedService<UserLocationUpdatedWorker>();
+        services.AddDbContext<RedisPubSubDbContext>(options => options.UseNpgsql(postgresOptions.ConnectionString));
+        services.AddRedis(context.Configuration);
+        services.AddHostedService<UserLocationUpdatedWorker>();
+    })
+    .Build();
 
-var host = builder.Build();
 await host.RunAsync();

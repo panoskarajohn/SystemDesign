@@ -9,7 +9,9 @@ using StackExchange.Redis;
 namespace RedisPubSub.Workers;
 
 public sealed class UserLocationUpdatedWorker : IHostedService {
+    private static readonly TimeSpan ProcessedEventTtl = TimeSpan.FromMinutes(15);
     private const string UserLocationKeyPrefix = "users:location:";
+    private const string ProcessedEventKeyPrefix = "outbox:processed:user-location-updated:";
     private const double NearbyDistanceInKm = 2.0;
 
     private readonly IRedisChannelSubscriber subscriber;
@@ -47,6 +49,14 @@ public sealed class UserLocationUpdatedWorker : IHostedService {
     private async Task processLocationUpdateAsync(UserLocationUpdatedMessage message, CancellationToken cancellationToken) {
         try {
             var redisDatabase = multiplexer.GetDatabase();
+            var wasMarkedForProcessing = await tryMarkEventForProcessingAsync(redisDatabase, message).ConfigureAwait(false);
+            if (!wasMarkedForProcessing) {
+                logger.LogInformation(
+                    "Skipping already processed location update for user {UserId} at {UpdatedAtUtc}.",
+                    message.UserId,
+                    message.UpdatedAtUtc);
+                return;
+            }
 
             await using var scope = serviceScopeFactory.CreateAsyncScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<RedisPubSubDbContext>();
@@ -121,4 +131,14 @@ public sealed class UserLocationUpdatedWorker : IHostedService {
     private static double toRadians(double angle) => angle * (Math.PI / 180.0);
 
     private static string getNearbyFriendsSetKey(Guid subscriberId) => $"nearby:friends:{subscriberId}";
+
+    private static string getProcessedEventKey(UserLocationUpdatedMessage message)
+        => $"{ProcessedEventKeyPrefix}{message.UserId:N}:{message.UpdatedAtUtc.ToUniversalTime():O}";
+
+    private static Task<bool> tryMarkEventForProcessingAsync(IDatabase redisDatabase, UserLocationUpdatedMessage message)
+        => redisDatabase.StringSetAsync(
+            getProcessedEventKey(message),
+            "1",
+            ProcessedEventTtl,
+            when: When.NotExists);
 }
