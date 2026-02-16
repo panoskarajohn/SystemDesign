@@ -36,8 +36,10 @@
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://+:8080"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - apinetwork
     healthcheck:
@@ -56,12 +58,11 @@
       postgres__ConnectionString: "Host=postgres;Port=5432;Database=nearbyfriends;Username=postgres;Password=postgres"
       redis__ConnectionString: "redis:6379"
     depends_on:
-      nearby.api:
-        condition: service_healthy
       redis:
         condition: service_healthy
       postgres:
-        condition: service_started
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - apinetwork
 
@@ -97,6 +98,11 @@
       - "5432:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   redis:
     image: redis:7-alpine
