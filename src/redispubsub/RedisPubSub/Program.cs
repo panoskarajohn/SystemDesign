@@ -10,7 +10,10 @@ using StackExchange.Redis;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddPostgres<RedisPubSubDbContext>(builder.Configuration);
+var postgresSection = builder.Configuration.GetRequiredSection("postgres");
+var postgresOptions = new PostgresOptions();
+postgresSection.Bind(postgresOptions);
+builder.Services.AddDbContext<RedisPubSubDbContext>(options => options.UseNpgsql(postgresOptions.ConnectionString));
 builder.Services.AddRedis(builder.Configuration);
 builder.Services.AddHostedService<ChannelSubscriberWorker>();
 
