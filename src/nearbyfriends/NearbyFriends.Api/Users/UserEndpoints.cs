@@ -273,13 +273,11 @@ public static class UserEndpoints {
             }
 
             var redisDatabase = multiplexer.GetDatabase();
-            var members = await redisDatabase.SetMembersAsync("nearby:friends").ConfigureAwait(false);
-            var userPrefix = $"{userId}:";
+            var members = await redisDatabase.SetMembersAsync($"nearby:friends:{userId}").ConfigureAwait(false);
 
             var nearbyFriendIds = members
                 .Select(x => (string?)x)
-                .Where(x => !string.IsNullOrWhiteSpace(x) && x!.StartsWith(userPrefix, StringComparison.Ordinal))
-                .Select(x => x![userPrefix.Length..])
+                .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(x => Guid.TryParse(x, out var friendId) ? friendId : Guid.Empty)
                 .Where(x => x != Guid.Empty)
                 .Distinct()

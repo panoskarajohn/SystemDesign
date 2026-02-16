@@ -21,7 +21,6 @@ var host = builder.Build();
 await host.RunAsync();
 
 public sealed class ChannelSubscriberWorker : IHostedService {
-    private const string NearbyFriendsSetKey = "nearby:friends";
     private const string UserLocationKeyPrefix = "users:location:";
     private const double NearbyDistanceInKm = 2.0;
 
@@ -90,8 +89,8 @@ public sealed class ChannelSubscriberWorker : IHostedService {
                     continue;
                 }
 
-                var nearbyMember = $"{subscriberId}:{message.UserId}";
-                await redisDatabase.SetAddAsync(NearbyFriendsSetKey, nearbyMember).ConfigureAwait(false);
+                var subscriberNearbyFriendsKey = getNearbyFriendsSetKey(subscriberId);
+                await redisDatabase.SetAddAsync(subscriberNearbyFriendsKey, message.UserId.ToString()).ConfigureAwait(false);
             }
 
             logger.LogInformation(
@@ -123,6 +122,8 @@ public sealed class ChannelSubscriberWorker : IHostedService {
     }
 
     private static double toRadians(double angle) => angle * (Math.PI / 180.0);
+
+    private static string getNearbyFriendsSetKey(Guid subscriberId) => $"nearby:friends:{subscriberId}";
 
     public async Task StopAsync(CancellationToken cancellationToken) {
         if (subscription is not null) {
