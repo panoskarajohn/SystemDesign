@@ -251,4 +251,107 @@ public class UserEndpointsTests {
             }
         }
     }
+
+    [Fact]
+    public async Task NearbyFriendsShouldDisappearWhenUsersMoveFarApart() {
+        Guid? userAId = null;
+        Guid? userBId = null;
+        var userARequest = new CreateUserRequest(
+            $"user-{Guid.NewGuid():N}",
+            "Distance User A"
+        );
+        var userBRequest = new CreateUserRequest(
+            $"user-{Guid.NewGuid():N}",
+            "Distance User B"
+        );
+
+        try {
+            var createAResponse = await _nearbyClient.CreateUserAsync(userARequest);
+            var createBResponse = await _nearbyClient.CreateUserAsync(userBRequest);
+            Assert.Equal(HttpStatusCode.Created, createAResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Created, createBResponse.StatusCode);
+
+            var userA = await _nearbyClient.ReadUserAsync(createAResponse);
+            var userB = await _nearbyClient.ReadUserAsync(createBResponse);
+            Assert.NotNull(userA);
+            Assert.NotNull(userB);
+            userAId = userA!.UserId;
+            userBId = userB!.UserId;
+
+            var addFriendResponse = await _nearbyClient.AddFriendAsync(userA.UserId, userB.UserId);
+            Assert.Equal(HttpStatusCode.Created, addFriendResponse.StatusCode);
+
+            var subscribeResponse = await _nearbyClient.SubscribeToFriendLocationUpdatesAsync(userA.UserId, userB.UserId);
+            Assert.Equal(HttpStatusCode.Created, subscribeResponse.StatusCode);
+
+            var closeLocationA = new UpdateUserLocationRequest(40.6401, 22.9444);
+            var closeLocationB = new UpdateUserLocationRequest(40.6408, 22.9451);
+            var closeUpdateAResponse = await _nearbyClient.UpdateUserLocationAsync(userA.UserId, closeLocationA);
+            var closeUpdateBResponse = await _nearbyClient.UpdateUserLocationAsync(userB.UserId, closeLocationB);
+            Assert.Equal(HttpStatusCode.Accepted, closeUpdateAResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Accepted, closeUpdateBResponse.StatusCode);
+
+            var appeared = false;
+            for (var attempt = 0; attempt < 40; attempt++) {
+                var nearbyForAResponse = await _nearbyClient.GetNearbyFriendsAsync(userA.UserId);
+                var nearbyForBResponse = await _nearbyClient.GetNearbyFriendsAsync(userB.UserId);
+                Assert.Equal(HttpStatusCode.OK, nearbyForAResponse.StatusCode);
+                Assert.Equal(HttpStatusCode.OK, nearbyForBResponse.StatusCode);
+
+                var nearbyForA = await _nearbyClient.ReadNearbyFriendsResponseAsync(nearbyForAResponse);
+                var nearbyForB = await _nearbyClient.ReadNearbyFriendsResponseAsync(nearbyForBResponse);
+                Assert.NotNull(nearbyForA);
+                Assert.NotNull(nearbyForB);
+
+                if (nearbyForA!.NearbyFriendIds.Contains(userB.UserId) && nearbyForB!.NearbyFriendIds.Contains(userA.UserId)) {
+                    appeared = true;
+                    break;
+                }
+
+                await Task.Delay(250);
+            }
+
+            Assert.True(appeared, "Expected users to appear in each other's nearby-friends when close.");
+
+            var farLocationA = new UpdateUserLocationRequest(40.6401, 22.9444);
+            var farLocationB = new UpdateUserLocationRequest(41.0082, 28.9784);
+            var farUpdateAResponse = await _nearbyClient.UpdateUserLocationAsync(userA.UserId, farLocationA);
+            var farUpdateBResponse = await _nearbyClient.UpdateUserLocationAsync(userB.UserId, farLocationB);
+            Assert.Equal(HttpStatusCode.Accepted, farUpdateAResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Accepted, farUpdateBResponse.StatusCode);
+
+            var disappeared = false;
+            for (var attempt = 0; attempt < 40; attempt++) {
+                var nearbyForAResponse = await _nearbyClient.GetNearbyFriendsAsync(userA.UserId);
+                var nearbyForBResponse = await _nearbyClient.GetNearbyFriendsAsync(userB.UserId);
+                Assert.Equal(HttpStatusCode.OK, nearbyForAResponse.StatusCode);
+                Assert.Equal(HttpStatusCode.OK, nearbyForBResponse.StatusCode);
+
+                var nearbyForA = await _nearbyClient.ReadNearbyFriendsResponseAsync(nearbyForAResponse);
+                var nearbyForB = await _nearbyClient.ReadNearbyFriendsResponseAsync(nearbyForBResponse);
+                Assert.NotNull(nearbyForA);
+                Assert.NotNull(nearbyForB);
+
+                var hasAToB = nearbyForA!.NearbyFriendIds.Contains(userB.UserId);
+                var hasBToA = nearbyForB!.NearbyFriendIds.Contains(userA.UserId);
+                if (!hasAToB && !hasBToA) {
+                    disappeared = true;
+                    break;
+                }
+
+                await Task.Delay(250);
+            }
+
+            Assert.True(disappeared, "Expected users to disappear from nearby-friends when they move far apart.");
+        }
+        finally {
+            if (userAId.HasValue) {
+                await _nearbyClient.DeleteUserAsync(userAId.Value);
+            }
+
+            if (userBId.HasValue) {
+                await _nearbyClient.DeleteUserAsync(userBId.Value);
+            }
+        }
+    }
 }

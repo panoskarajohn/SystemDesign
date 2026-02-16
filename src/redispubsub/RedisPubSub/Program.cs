@@ -85,12 +85,15 @@ public sealed class ChannelSubscriberWorker : IHostedService {
                     subscriberLocation.Latitude,
                     subscriberLocation.Longitude);
 
-                if (distanceInKm > NearbyDistanceInKm) {
+                var subscriberNearbyFriendsKey = getNearbyFriendsSetKey(subscriberId);
+                var targetUserId = message.UserId.ToString();
+
+                if (distanceInKm <= NearbyDistanceInKm) {
+                    await redisDatabase.SetAddAsync(subscriberNearbyFriendsKey, targetUserId).ConfigureAwait(false);
                     continue;
                 }
 
-                var subscriberNearbyFriendsKey = getNearbyFriendsSetKey(subscriberId);
-                await redisDatabase.SetAddAsync(subscriberNearbyFriendsKey, message.UserId.ToString()).ConfigureAwait(false);
+                await redisDatabase.SetRemoveAsync(subscriberNearbyFriendsKey, targetUserId).ConfigureAwait(false);
             }
 
             logger.LogInformation(
