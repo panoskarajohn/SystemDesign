@@ -1,8 +1,13 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using NearbyFriends.Api.Persistence;
+using Shared.Redis;
+using Shared.Redis.Abstractions;
+using Shared.Redis.Contracts;
+using StackExchange.Redis;
 
 namespace NearbyFriends.Api.Users;
 
@@ -113,6 +118,46 @@ public static class UserEndpoints {
             await dbContext.SaveChangesAsync(cancellationToken);
             return Results.NoContent();
         }).WithName("DeleteUser");
+
+        group.MapPost("{userId:guid}/location", async (
+            Guid userId,
+            UpdateUserLocationRequest request,
+            NearbyFriendsDbContext dbContext,
+            IConnectionMultiplexer multiplexer,
+            IRedisChannelPublisher publisher,
+            CancellationToken cancellationToken) => {
+            var userExists = await dbContext.Users.AnyAsync(x => x.Id == userId, cancellationToken);
+            if (!userExists) {
+                return Results.NotFound(new { message = "User not found." });
+            }
+
+            if (request.Latitude is < -90 or > 90) {
+                return Results.BadRequest(new { message = "Latitude must be between -90 and 90." });
+            }
+
+            if (request.Longitude is < -180 or > 180) {
+                return Results.BadRequest(new { message = "Longitude must be between -180 and 180." });
+            }
+
+            var message = new UserLocationUpdatedMessage(userId, request.Latitude, request.Longitude, DateTime.UtcNow);
+            var key = $"users:location:{userId}";
+
+            var redisDatabase = multiplexer.GetDatabase();
+            await redisDatabase.StringSetAsync(key, JsonSerializer.Serialize(message)).ConfigureAwait(false);
+
+            var publishedToSubscribers = await publisher
+                .PublishAsync(RedisChannels.UserLocationUpdated, message, cancellationToken)
+                .ConfigureAwait(false);
+
+            var response = new UpdateUserLocationResponse(
+                userId,
+                request.Latitude,
+                request.Longitude,
+                message.UpdatedAtUtc,
+                publishedToSubscribers);
+
+            return Results.Accepted($"/api/users/{userId}/location", response);
+        }).WithName("UpdateUserLocation");
 
         return endpoints;
     }

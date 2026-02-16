@@ -32,10 +32,12 @@
       - "1001:8080"
     environment:
       postgres__ConnectionString: "Host=postgres;Port=5432;Database=nearbyfriends;Username=postgres;Password=postgres"
+      redis__ConnectionString: "redis:6379"
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://+:8080"
     depends_on:
       - postgres
+      - redis
     networks:
       - apinetwork
     healthcheck:

@@ -11,6 +11,7 @@ WORKDIR /src
 COPY ["src/nearbyfriends/NearbyFriends.Api/NearbyFriends.Api.csproj", "src/nearbyfriends/NearbyFriends.Api/"]
 COPY ["src/shared/Shared.Postgres/Shared.Postgres.csproj", "src/shared/Shared.Postgres/"]
 COPY ["src/shared/Shared.Common/Shared.Common.csproj", "src/shared/Shared.Common/"]
+COPY ["src/shared/Shared.Redis/Shared.Redis.csproj", "src/shared/Shared.Redis/"]
 
 RUN dotnet restore "src/nearbyfriends/NearbyFriends.Api/NearbyFriends.Api.csproj"
 

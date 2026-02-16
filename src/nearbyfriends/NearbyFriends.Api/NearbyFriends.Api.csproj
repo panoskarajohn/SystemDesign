@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\shared\Shared.Postgres\Shared.Postgres.csproj" />
+    <ProjectReference Include="..\..\shared\Shared.Redis\Shared.Redis.csproj" />
   </ItemGroup>
 
 </Project>
