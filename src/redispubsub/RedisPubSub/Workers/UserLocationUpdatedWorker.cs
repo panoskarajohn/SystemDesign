@@ -9,6 +9,7 @@ using StackExchange.Redis;
 namespace RedisPubSub.Workers;
 
 public sealed class UserLocationUpdatedWorker : IHostedService {
+    // outbox messages will live for 15 minutes
     private static readonly TimeSpan ProcessedEventTtl = TimeSpan.FromMinutes(15);
     private const string UserLocationKeyPrefix = "users:location:";
     private const string ProcessedEventKeyPrefix = "outbox:processed:user-location-updated:";
