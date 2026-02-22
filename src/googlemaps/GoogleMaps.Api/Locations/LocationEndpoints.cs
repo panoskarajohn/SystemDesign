@@ -11,7 +11,9 @@ public static class LocationEndpoints {
     private const int BatchWindowSeconds = 15;
 
     public static IEndpointRouteBuilder MapLocationEndpoints(this IEndpointRouteBuilder endpoints) {
-        endpoints.MapPost("/v1/locations", async (
+        var group = endpoints.MapGroup("/v1/locations");
+
+        group.MapPost("", async (
             PostLocationsRequest request,
             IMongoRepository<UserLocation, string> repository) => {
             if (string.IsNullOrWhiteSpace(request.UserId)) {
@@ -42,7 +44,7 @@ public static class LocationEndpoints {
             return Results.Ok(new PostLocationsResponse(request.UserId.Trim(), documents.Count));
         });
 
-        endpoints.MapGet("/v1/locations/{userId}/last", async (
+        group.MapGet("{userId}/last", async (
             string userId,
             IMongoRepository<UserLocation, string> repository) => {
             if (string.IsNullOrWhiteSpace(userId)) {
@@ -64,6 +66,17 @@ public static class LocationEndpoints {
                 latest.Location.Coordinates.Longitude,
                 latest.Timestamp
             ));
+        });
+
+        group.MapDelete("{userId}", async (
+            string userId,
+            IMongoRepository<UserLocation, string> repository) => {
+            if (string.IsNullOrWhiteSpace(userId)) {
+                return Results.BadRequest(new { message = "userId is required." });
+            }
+
+            var result = await repository.Collection.DeleteManyAsync(x => x.UserId == userId);
+            return Results.Ok(new { userId, deletedCount = result.DeletedCount });
         });
 
         return endpoints;

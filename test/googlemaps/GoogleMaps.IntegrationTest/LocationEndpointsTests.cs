@@ -26,23 +26,30 @@ public class LocationEndpointsTests {
             locations
         );
 
-        var postResponse = await _googleMapsClient.PostLocationsAsync(request);
-        Assert.Equal(HttpStatusCode.OK, postResponse.StatusCode);
+        try {
+            await _googleMapsClient.ClearUserLocationsAsync(userId);
 
-        var postPayload = await _googleMapsClient.ReadPostLocationsResponseAsync(postResponse);
-        Assert.NotNull(postPayload);
-        Assert.Equal(userId, postPayload!.UserId);
-        Assert.Equal(15, postPayload.InsertedCount);
+            var postResponse = await _googleMapsClient.PostLocationsAsync(request);
+            Assert.Equal(HttpStatusCode.OK, postResponse.StatusCode);
 
-        var getResponse = await _googleMapsClient.GetLastLocationAsync(userId);
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+            var postPayload = await _googleMapsClient.ReadPostLocationsResponseAsync(postResponse);
+            Assert.NotNull(postPayload);
+            Assert.Equal(userId, postPayload!.UserId);
+            Assert.Equal(15, postPayload.InsertedCount);
 
-        var lastLocation = await _googleMapsClient.ReadLastLocationResponseAsync(getResponse);
-        Assert.NotNull(lastLocation);
-        Assert.Equal(userId, lastLocation!.UserId);
-        var expectedLast = locations[^1];
-        Assert.Equal(expectedLast.Latitude, lastLocation.Latitude, precision: 4);
-        Assert.Equal(expectedLast.Longitude, lastLocation.Longitude, precision: 4);
-        Assert.Equal(expectedLast.Timestamp, lastLocation.Timestamp);
+            var getResponse = await _googleMapsClient.GetLastLocationAsync(userId);
+            Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+            var lastLocation = await _googleMapsClient.ReadLastLocationResponseAsync(getResponse);
+            Assert.NotNull(lastLocation);
+            Assert.Equal(userId, lastLocation!.UserId);
+            var expectedLast = locations[^1];
+            Assert.Equal(expectedLast.Latitude, lastLocation.Latitude, precision: 4);
+            Assert.Equal(expectedLast.Longitude, lastLocation.Longitude, precision: 4);
+            Assert.Equal(expectedLast.Timestamp, lastLocation.Timestamp);
+        }
+        finally {
+            await _googleMapsClient.ClearUserLocationsAsync(userId);
+        }
     }
 }

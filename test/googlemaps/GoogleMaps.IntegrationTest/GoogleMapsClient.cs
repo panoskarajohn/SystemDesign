@@ -27,6 +27,10 @@ public sealed class GoogleMapsClient : IDisposable {
         return _httpClient.GetAsync($"/v1/locations/{Uri.EscapeDataString(userId)}/last");
     }
 
+    public Task<HttpResponseMessage> ClearUserLocationsAsync(string userId) {
+        return _httpClient.DeleteAsync($"/v1/locations/{Uri.EscapeDataString(userId)}");
+    }
+
     public async Task<PostLocationsResponse?> ReadPostLocationsResponseAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content)) {
