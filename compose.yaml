@@ -67,6 +67,25 @@
       timeout: 5s
       retries: 5
 
+  geocoding.api:
+    image: geocoding.api
+    build:
+      context: .
+      dockerfile: src/googlemaps/Geocoding.Api/Dockerfile
+    container_name: geocoding-api
+    ports:
+      - "1003:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:8080"
+    networks:
+      - apinetwork
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redispubsub:
     image: redispubsub
     build:
