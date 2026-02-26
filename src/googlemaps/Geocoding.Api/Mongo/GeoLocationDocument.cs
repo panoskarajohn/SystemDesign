@@ -14,6 +14,9 @@ public sealed record GeoLocationDocument : IIdentifiable<string> {
     public string RegionBias { get; init; } = string.Empty;
     public string Source { get; init; } = string.Empty;
 
+    [BsonElement("plus_code")]
+    public string PlusCode { get; init; } = string.Empty;
+
     public GeoJsonPoint<GeoJson2DGeographicCoordinates> Location { get; init; } = null!;
     public DateTimeOffset Timestamp { get; init; }
 }
