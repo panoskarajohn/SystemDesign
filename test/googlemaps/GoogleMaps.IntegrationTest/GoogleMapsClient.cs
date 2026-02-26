@@ -31,6 +31,22 @@ public sealed class GoogleMapsClient : IDisposable {
         return _httpClient.DeleteAsync($"/v1/locations/{Uri.EscapeDataString(userId)}");
     }
 
+    public Task<HttpResponseMessage> InsertGeolocationAsync(InsertGeolocationRequest request) {
+        return _httpClient.PostAsJsonAsync("/v1/geolocations", request, _jsonOptions);
+    }
+
+    public Task<HttpResponseMessage> GetGeolocationAsync(string id) {
+        return _httpClient.GetAsync($"/v1/geolocations/{Uri.EscapeDataString(id)}");
+    }
+
+    public Task<HttpResponseMessage> DeleteGeolocationAsync(string id) {
+        return _httpClient.DeleteAsync($"/v1/geolocations/{Uri.EscapeDataString(id)}");
+    }
+
+    public Task<HttpResponseMessage> GenerateDirectionsAsync(GenerateDirectionsRequest request) {
+        return _httpClient.PostAsJsonAsync("/v1/directions", request, _jsonOptions);
+    }
+
     public async Task<PostLocationsResponse?> ReadPostLocationsResponseAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content)) {
@@ -47,6 +63,33 @@ public sealed class GoogleMapsClient : IDisposable {
         }
 
         return JsonSerializer.Deserialize<LastUserLocationResponse>(content, _jsonOptions);
+    }
+
+    public async Task<InsertGeolocationResponse?> ReadInsertGeolocationResponseAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<InsertGeolocationResponse>(content, _jsonOptions);
+    }
+
+    public async Task<GeolocationResponse?> ReadGeolocationResponseAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<GeolocationResponse>(content, _jsonOptions);
+    }
+
+    public async Task<GenerateDirectionsResponse?> ReadGenerateDirectionsResponseAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(content)) {
+            return null;
+        }
+
+        return JsonSerializer.Deserialize<GenerateDirectionsResponse>(content, _jsonOptions);
     }
 
     public void Dispose() {

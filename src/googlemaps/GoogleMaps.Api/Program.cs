@@ -1,4 +1,5 @@
 using GoogleMaps.Api.Locations;
+using GoogleMaps.Api.Directions;
 using GoogleMaps.Api.Geocoding;
 using GoogleMaps.Api.Geocoding.Mongo;
 using GoogleMaps.Api.Geocoding.Services;
@@ -19,6 +20,7 @@ var app = builder.Build();
 app.MapGet("/api/health", () => "healthy");
 app.MapLocationEndpoints();
 app.MapGeocodingEndpoints();
+app.MapDirectionsEndpoints();
 
 app.Run();
 
