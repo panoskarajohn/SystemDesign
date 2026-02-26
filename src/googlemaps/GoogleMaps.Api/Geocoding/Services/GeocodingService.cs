@@ -1,8 +1,8 @@
-using Geocoding.Api.Contracts;
-using Geocoding.Api.Mongo;
+using GoogleMaps.Api.Geocoding.Contracts;
+using GoogleMaps.Api.Geocoding.Mongo;
 using MongoDB.Driver.GeoJsonObjectModel;
 
-namespace Geocoding.Api.Geocoding;
+namespace GoogleMaps.Api.Geocoding.Services;
 
 public class GeocodingService {
     private readonly IGeoLocationRepository _geoLocationRepository;

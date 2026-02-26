@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\googlemaps\Geocoding.Api\Geocoding.Api.csproj" />
+    <ProjectReference Include="..\..\..\src\googlemaps\GoogleMaps.Api\GoogleMaps.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

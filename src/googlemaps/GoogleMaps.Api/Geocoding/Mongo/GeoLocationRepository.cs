@@ -1,7 +1,7 @@
-using Shared.Mongo.Repositories;
 using MongoDB.Driver;
+using Shared.Mongo.Repositories;
 
-namespace Geocoding.Api.Mongo;
+namespace GoogleMaps.Api.Geocoding.Mongo;
 
 public sealed class GeoLocationRepository : IGeoLocationRepository {
     private readonly IMongoRepository<GeoLocationDocument, string> _repository;
@@ -15,11 +15,9 @@ public sealed class GeoLocationRepository : IGeoLocationRepository {
     }
 
     public async Task<GeoLocationDocument?> GetByIdAsync(string id, CancellationToken cancellationToken = default) {
-        var document = await _repository.Collection
+        return await _repository.Collection
             .Find(x => x.Id == id)
             .FirstOrDefaultAsync(cancellationToken);
-
-        return document;
     }
 
     public async Task<bool> DeleteByIdAsync(string id, CancellationToken cancellationToken = default) {

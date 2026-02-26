@@ -7,7 +7,7 @@ public class GeocodingTestCollection : ICollectionFixture<GeocodingTestFixture> 
 }
 
 public class GeocodingTestFixture : IAsyncLifetime {
-    private const string GeocodingBaseUrl = "http://localhost:1003";
+    private const string GeocodingBaseUrl = "http://localhost:1002";
     public GeocodingClient GeocodingClient { get; set; } = null!;
 
     public async Task DisposeAsync() {
@@ -35,6 +35,6 @@ public class GeocodingTestFixture : IAsyncLifetime {
             }
         }
 
-        throw new TimeoutException("Geocoding API did not become healthy in time.");
+        throw new TimeoutException("GoogleMaps API (geocoding endpoints) did not become healthy in time.");
     }
 }

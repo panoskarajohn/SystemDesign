@@ -1,4 +1,4 @@
-namespace Geocoding.Api.Mongo;
+namespace GoogleMaps.Api.Geocoding.Mongo;
 
 public interface IGeoLocationRepository {
     Task InsertAsync(GeoLocationDocument document, CancellationToken cancellationToken = default);

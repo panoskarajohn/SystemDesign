@@ -1,4 +1,4 @@
-namespace Geocoding.Api.Contracts;
+namespace GoogleMaps.Api.Geocoding.Contracts;
 
 public record GeoPoint {
     public GeoPoint(double longitude, double latitude) {
@@ -23,22 +23,20 @@ public record GeoPoint {
         Longitude = longitude;
         Latitude = latitude;
     }
+
     public double Longitude { get; init; }
     public double Latitude { get; init; }
 
     internal void Deconstruct(out double latitude, out double longitude) {
-        latitude = this.Latitude;
-        longitude = this.Longitude;
+        latitude = Latitude;
+        longitude = Longitude;
     }
 }
 
 public class InsertGeolocationRequest {
     public required GeoPoint Location { get; set; }
-    // human input
     public required string Input { get; set; }
     public required string Language { get; set; }
     public required string RegionBias { get; set; }
-
-    // source metadata
     public required string Source { get; set; }
 }

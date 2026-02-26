@@ -1,4 +1,4 @@
-namespace Geocoding.Api.Contracts;
+namespace GoogleMaps.Api.Geocoding.Contracts;
 
 public sealed record InsertGeolocationResponse(string Id);
 

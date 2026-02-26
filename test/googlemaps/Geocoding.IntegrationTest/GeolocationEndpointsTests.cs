@@ -1,5 +1,4 @@
 using System.Net;
-using Geocoding.Api.Geocoding;
 
 namespace Geocoding.IntegrationTest;
 
@@ -42,7 +41,7 @@ public class GeolocationEndpointsTests {
             Assert.Equal(geolocationId, geolocation!.Id);
             Assert.False(string.IsNullOrWhiteSpace(geolocation.PlusCode));
 
-            var decoded = PlusCode.Decode(geolocation.PlusCode);
+            var decoded = TestPlusCode.Decode(geolocation.PlusCode);
             Assert.Equal(latitude, decoded.Latitude, precision: 4);
             Assert.Equal(longitude, decoded.Longitude, precision: 4);
         }

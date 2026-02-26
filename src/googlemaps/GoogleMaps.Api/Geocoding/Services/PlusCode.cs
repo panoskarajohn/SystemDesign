@@ -1,6 +1,6 @@
-using Geocoding.Api.Contracts;
+using GoogleMaps.Api.Geocoding.Contracts;
 
-namespace Geocoding.Api.Geocoding;
+namespace GoogleMaps.Api.Geocoding.Services;
 
 public static class PlusCode {
     private const string Alphabet = "23456789CFGHJMPQRVWX";
@@ -66,7 +66,6 @@ public static class PlusCode {
 
         for (var i = 0; i < PairResolutions.Length; i++) {
             var resolution = PairResolutions[i];
-
             var latDigit = Alphabet.IndexOf(normalized[i * 2]);
             var lonDigit = Alphabet.IndexOf(normalized[(i * 2) + 1]);
 
