@@ -88,7 +88,7 @@ public static class DirectionsEndpoints {
                     .Select((step, index) => {
                         var fromNode = navigationNodes[step.FromPlusCode];
                         var toNode = navigationNodes[step.ToPlusCode];
-                        var heading = GetHeading(fromNode.Latitude, fromNode.Longitude, toNode.Latitude, toNode.Longitude);
+                        var heading = getHeading(fromNode.Latitude, fromNode.Longitude, toNode.Latitude, toNode.Longitude);
 
                         return new DirectionStepResponse(
                             index + 1,
@@ -202,7 +202,7 @@ public static class DirectionsEndpoints {
         return true;
     }
 
-    private static string GetHeading(double fromLatitude, double fromLongitude, double toLatitude, double toLongitude) {
+    private static string getHeading(double fromLatitude, double fromLongitude, double toLatitude, double toLongitude) {
         var bearing = initialBearing(fromLatitude, fromLongitude, toLatitude, toLongitude);
 
         if (bearing >= 337.5 || bearing < 22.5) {
