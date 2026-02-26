@@ -1,4 +1,4 @@
-namespace Geocoding.IntegrationTest;
+namespace GoogleMaps.IntegrationTest;
 
 public static class TestPlusCode {
     private const string Alphabet = "23456789CFGHJMPQRVWX";

@@ -51,8 +51,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "googlemaps", "googlemaps", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleMaps.IntegrationTest", "test\googlemaps\GoogleMaps.IntegrationTest\GoogleMaps.IntegrationTest.csproj", "{A595CBC2-2C60-496B-BB3A-2A46957D48B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geocoding.IntegrationTest", "test\googlemaps\Geocoding.IntegrationTest\Geocoding.IntegrationTest.csproj", "{60C28D43-4302-4E96-BB76-355708E11267}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -219,18 +217,6 @@ Global
 		{A595CBC2-2C60-496B-BB3A-2A46957D48B4}.Release|x64.Build.0 = Release|Any CPU
 		{A595CBC2-2C60-496B-BB3A-2A46957D48B4}.Release|x86.ActiveCfg = Release|Any CPU
 		{A595CBC2-2C60-496B-BB3A-2A46957D48B4}.Release|x86.Build.0 = Release|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Debug|x64.Build.0 = Debug|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Debug|x86.Build.0 = Debug|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Release|Any CPU.Build.0 = Release|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Release|x64.ActiveCfg = Release|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Release|x64.Build.0 = Release|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Release|x86.ActiveCfg = Release|Any CPU
-		{60C28D43-4302-4E96-BB76-355708E11267}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -257,6 +243,5 @@ Global
 		{EFDB8E25-5D7E-4E00-AABC-B12158365ECE} = {2D2D532F-5DAA-1F8C-D21E-20C8FA610075}
 		{9B9AF1DE-DD58-078A-6FCC-F2045CD4FA09} = {0C88DD14-F956-CE84-757C-A364CCF449FC}
 		{A595CBC2-2C60-496B-BB3A-2A46957D48B4} = {9B9AF1DE-DD58-078A-6FCC-F2045CD4FA09}
-		{60C28D43-4302-4E96-BB76-355708E11267} = {9B9AF1DE-DD58-078A-6FCC-F2045CD4FA09}
 	EndGlobalSection
 EndGlobal

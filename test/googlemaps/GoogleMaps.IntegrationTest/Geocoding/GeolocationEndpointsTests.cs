@@ -1,13 +1,13 @@
 using System.Net;
 
-namespace Geocoding.IntegrationTest;
+namespace GoogleMaps.IntegrationTest;
 
-[Collection("GeocodingTests")]
+[Collection("GoogleMapsTests")]
 public class GeolocationEndpointsTests {
-    private readonly GeocodingClient _geocodingClient;
+    private readonly GoogleMapsClient _googleMapsClient;
 
-    public GeolocationEndpointsTests(GeocodingTestFixture fixture) {
-        _geocodingClient = fixture.GeocodingClient;
+    public GeolocationEndpointsTests(GoogleMapsTestFixture fixture) {
+        _googleMapsClient = fixture.GoogleMapsClient;
     }
 
     [Fact]
@@ -25,18 +25,18 @@ public class GeolocationEndpointsTests {
                 "integration-test"
             );
 
-            var insertResponse = await _geocodingClient.InsertGeolocationAsync(insertRequest);
+            var insertResponse = await _googleMapsClient.InsertGeolocationAsync(insertRequest);
             Assert.Equal(HttpStatusCode.Accepted, insertResponse.StatusCode);
 
-            var insertPayload = await _geocodingClient.ReadInsertGeolocationResponseAsync(insertResponse);
+            var insertPayload = await _googleMapsClient.ReadInsertGeolocationResponseAsync(insertResponse);
             Assert.NotNull(insertPayload);
             Assert.False(string.IsNullOrWhiteSpace(insertPayload!.Id));
             geolocationId = insertPayload.Id;
 
-            var getResponse = await _geocodingClient.GetGeolocationAsync(geolocationId);
+            var getResponse = await _googleMapsClient.GetGeolocationAsync(geolocationId);
             Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
 
-            var geolocation = await _geocodingClient.ReadGeolocationResponseAsync(getResponse);
+            var geolocation = await _googleMapsClient.ReadGeolocationResponseAsync(getResponse);
             Assert.NotNull(geolocation);
             Assert.Equal(geolocationId, geolocation!.Id);
             Assert.False(string.IsNullOrWhiteSpace(geolocation.PlusCode));
@@ -47,7 +47,7 @@ public class GeolocationEndpointsTests {
         }
         finally {
             if (!string.IsNullOrWhiteSpace(geolocationId)) {
-                await _geocodingClient.DeleteGeolocationAsync(geolocationId);
+                await _googleMapsClient.DeleteGeolocationAsync(geolocationId);
             }
         }
     }

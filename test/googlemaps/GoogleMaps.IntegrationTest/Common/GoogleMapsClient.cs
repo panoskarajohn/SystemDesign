@@ -84,12 +84,8 @@ public sealed class GoogleMapsClient : IDisposable {
     }
 
     public async Task<GenerateDirectionsResponse?> ReadGenerateDirectionsResponseAsync(HttpResponseMessage response) {
-        var content = await response.Content.ReadAsStringAsync();
-        if (string.IsNullOrWhiteSpace(content)) {
-            return null;
-        }
-
-        return JsonSerializer.Deserialize<GenerateDirectionsResponse>(content, _jsonOptions);
+        var content = await response.Content.ReadAsStreamAsync();
+        return await JsonSerializer.DeserializeAsync<GenerateDirectionsResponse>(content, _jsonOptions);
     }
 
     public void Dispose() {
