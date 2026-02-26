@@ -15,4 +15,8 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\Shared.Mongo\Shared.Mongo.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,19 +1,29 @@
-
 using Geocoding.Api.Contracts;
+using Geocoding.Api.Mongo;
+using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace Geocoding.Api.Geocoding;
 
 public class GeocodingService {
+    private readonly IGeoLocationRepository _geoLocationRepository;
 
-    public GeocodingService() {
+    public GeocodingService(IGeoLocationRepository geoLocationRepository) {
+        _geoLocationRepository = geoLocationRepository;
     }
 
-    public async Task InsertGeocodingResultAsync(InsertGeolocationRequest request) {
-        throw new NotImplementedException();
-    }
-    private static string encodePosition(double latitude, double longitude) {
-        return "";
+    public Task InsertGeocodingResultAsync(InsertGeolocationRequest request, CancellationToken cancellationToken = default) {
+        var document = new GeoLocationDocument {
+            Input = request.Input.Trim(),
+            Language = request.Language.Trim(),
+            RegionBias = request.RegionBias.Trim(),
+            Source = request.Source.Trim(),
+            Location = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(
+                new GeoJson2DGeographicCoordinates(request.Location.Longitude, request.Location.Latitude)
+            ),
+            Timestamp = DateTimeOffset.UtcNow
+        };
 
+        return _geoLocationRepository.InsertAsync(document, cancellationToken);
     }
 }
 
