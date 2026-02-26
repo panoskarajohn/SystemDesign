@@ -79,10 +79,12 @@ public class DirectionsEndpointsTests {
             Assert.True(directions.TotalDistanceMeters > 0);
             Assert.False(string.IsNullOrWhiteSpace(directions.OriginPlusCode));
             Assert.False(string.IsNullOrWhiteSpace(directions.DestinationPlusCode));
-            Assert.All(directions.Steps, step => Assert.StartsWith("Go ", step.Instruction));
+            Assert.All(directions.Steps[..^1], step => Assert.StartsWith("Go ", step.Instruction));
             Assert.Contains(directions.Steps, step => step.Heading.Contains("west", StringComparison.OrdinalIgnoreCase));
+            Assert.StartsWith("You reached ", directions.Steps[^1].Instruction);
             Assert.Equal(destinationInput, directions.Steps[^1].TargetInput);
             Assert.Equal(directions.DestinationPlusCode, directions.Steps[^1].ToPlusCode);
+            Assert.Equal(0, directions.Steps[^1].DistanceMeters);
         }
         finally {
             await _googleMapsClient.ClearUserLocationsAsync(userId);

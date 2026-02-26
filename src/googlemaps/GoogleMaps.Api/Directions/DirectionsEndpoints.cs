@@ -84,7 +84,7 @@ public static class DirectionsEndpoints {
                     return Results.NotFound(new { message = "No path found between origin and destination." });
                 }
 
-                var orderedSteps = path
+                var movementSteps = path
                     .Select((step, index) => {
                         var fromNode = navigationNodes[step.FromPlusCode];
                         var toNode = navigationNodes[step.ToPlusCode];
@@ -102,12 +102,24 @@ public static class DirectionsEndpoints {
                     })
                     .ToList();
 
+                var orderedSteps = new List<DirectionStepResponse>(movementSteps.Count + 1);
+                orderedSteps.AddRange(movementSteps);
+                orderedSteps.Add(new DirectionStepResponse(
+                    orderedSteps.Count + 1,
+                    $"You reached {destination.Input}.",
+                    "arrive",
+                    0,
+                    destination.Input,
+                    destinationPlusCode,
+                    destinationPlusCode
+                ));
+
                 var response = new GenerateDirectionsResponse(
                     request.UserId.Trim(),
                     request.DestinationInput.Trim(),
                     originPlusCode,
                     destinationPlusCode,
-                    orderedSteps.Sum(x => x.DistanceMeters),
+                    movementSteps.Sum(x => x.DistanceMeters),
                     orderedSteps
                 );
 
