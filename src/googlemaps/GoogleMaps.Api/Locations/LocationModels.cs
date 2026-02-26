@@ -1,9 +1,7 @@
-using System.Text.Json.Serialization;
-
 namespace GoogleMaps.Api.Locations;
 
 public sealed record PostLocationsRequest(
-    [property: JsonPropertyName("user_id")] string UserId,
+    string UserId,
     IReadOnlyList<LocationPointRequest> Locations
 );
 
@@ -14,12 +12,12 @@ public sealed record LocationPointRequest(
 );
 
 public sealed record PostLocationsResponse(
-    [property: JsonPropertyName("user_id")] string UserId,
+    string UserId,
     int InsertedCount
 );
 
 public sealed record LastUserLocationResponse(
-    [property: JsonPropertyName("user_id")] string UserId,
+    string UserId,
     double Latitude,
     double Longitude,
     DateTimeOffset Timestamp
