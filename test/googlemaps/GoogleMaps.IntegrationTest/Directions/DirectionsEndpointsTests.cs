@@ -17,7 +17,7 @@ public class DirectionsEndpointsTests {
         var geolocationIds = new List<string>();
 
         const string stJohnsWoodInput = "St John's Wood Station, London";
-        const string destinationInput = "St Elizabeth's Hospital, London";
+        const string destinationInput = "St John & St Elizabeth Hospital, London";
 
         const double originLatitude = 51.53408;
         const double originLongitude = -0.17485;
@@ -25,11 +25,10 @@ public class DirectionsEndpointsTests {
         try {
             var places = new[] {
                 new { Input = stJohnsWoodInput, Latitude = 51.53408, Longitude = -0.17485 },
-                new { Input = "Wellington Road, London", Latitude = 51.53395, Longitude = -0.17710 },
-                new { Input = "Abercorn Place, London", Latitude = 51.53380, Longitude = -0.17980 },
-                new { Input = "St John's Wood Road, London", Latitude = 51.53362, Longitude = -0.18260 },
-                new { Input = "Lisson Grove, London", Latitude = 51.53330, Longitude = -0.18515 },
-                new { Input = destinationInput, Latitude = 51.53295, Longitude = -0.18785 }
+                new { Input = "Wellington Place, London", Latitude = 51.53412, Longitude = -0.17708 },
+                new { Input = "Grove End Road, London", Latitude = 51.53433, Longitude = -0.18062 },
+                new { Input = "Allitsen Road, London", Latitude = 51.53456, Longitude = -0.18305 },
+                new { Input = destinationInput, Latitude = 51.53467, Longitude = -0.18438 }
             };
 
             foreach (var place in places) {
