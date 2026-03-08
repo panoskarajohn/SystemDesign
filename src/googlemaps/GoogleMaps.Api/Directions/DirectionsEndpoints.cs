@@ -13,6 +13,7 @@ public static class DirectionsEndpoints {
 
     public static IEndpointRouteBuilder MapDirectionsEndpoints(this IEndpointRouteBuilder endpoints) {
         var group = endpoints.MapGroup("/v1/directions");
+        var routesGroup = endpoints.MapGroup("/v1/routes");
 
         group.MapPost("", async (
             GenerateDirectionsRequest request,
@@ -124,6 +125,90 @@ public static class DirectionsEndpoints {
                 );
 
                 return Results.Ok(response);
+            });
+
+        routesGroup.MapPost("", async (
+            GenerateRouteRequest request,
+            IMongoRepository<GeoLocationDocument, string> geolocationRepository,
+            CancellationToken cancellationToken) => {
+                if (string.IsNullOrWhiteSpace(request.OriginInput)
+                    || string.IsNullOrWhiteSpace(request.DestinationInput)) {
+                    return Results.BadRequest(new { message = "origin_input and destination_input are required." });
+                }
+
+                var originInput = request.OriginInput.Trim();
+                var destinationInput = request.DestinationInput.Trim();
+
+                var origin = await geolocationRepository.Collection
+                    .Find(x => x.Input == originInput)
+                    .SortByDescending(x => x.Timestamp)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (origin is null) {
+                    return Results.NotFound(new { message = "Origin geolocation not found." });
+                }
+
+                var destination = await geolocationRepository.Collection
+                    .Find(x => x.Input == destinationInput)
+                    .SortByDescending(x => x.Timestamp)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (destination is null) {
+                    return Results.NotFound(new { message = "Destination geolocation not found." });
+                }
+
+                var path = new List<RoutePointResponse> {
+                    new(
+                        origin.Location.Coordinates.Latitude,
+                        origin.Location.Coordinates.Longitude,
+                        origin.PlusCode.ToUpperInvariant(),
+                        origin.Input
+                    ),
+                    new(
+                        destination.Location.Coordinates.Latitude,
+                        destination.Location.Coordinates.Longitude,
+                        destination.PlusCode.ToUpperInvariant(),
+                        destination.Input
+                    )
+                };
+
+                var totalDistanceMeters = haversineMeters(
+                    origin.Location.Coordinates.Latitude,
+                    origin.Location.Coordinates.Longitude,
+                    destination.Location.Coordinates.Latitude,
+                    destination.Location.Coordinates.Longitude
+                );
+
+                var heading = getHeading(
+                    origin.Location.Coordinates.Latitude,
+                    origin.Location.Coordinates.Longitude,
+                    destination.Location.Coordinates.Latitude,
+                    destination.Location.Coordinates.Longitude
+                );
+
+                var segments = new List<RouteSegmentResponse> {
+                    new(
+                        1,
+                        $"Go {heading} to {destination.Input}.",
+                        heading,
+                        totalDistanceMeters
+                    )
+                };
+
+                var drawing = new RouteDrawingResponse(
+                    "polyline",
+                    "Draw one polyline using the coordinates in order.",
+                    path
+                );
+
+                return Results.Ok(new GenerateRouteResponse(
+                    originInput,
+                    destinationInput,
+                    totalDistanceMeters,
+                    path,
+                    segments,
+                    drawing
+                ));
             });
 
         return endpoints;

@@ -47,6 +47,10 @@ public sealed class GoogleMapsClient : IDisposable {
         return _httpClient.PostAsJsonAsync("/v1/directions", request, _jsonOptions);
     }
 
+    public Task<HttpResponseMessage> GenerateRouteAsync(GenerateRouteRequest request) {
+        return _httpClient.PostAsJsonAsync("/v1/routes", request, _jsonOptions);
+    }
+
     public async Task<PostLocationsResponse?> ReadPostLocationsResponseAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content)) {
@@ -86,6 +90,11 @@ public sealed class GoogleMapsClient : IDisposable {
     public async Task<GenerateDirectionsResponse?> ReadGenerateDirectionsResponseAsync(HttpResponseMessage response) {
         var content = await response.Content.ReadAsStreamAsync();
         return await JsonSerializer.DeserializeAsync<GenerateDirectionsResponse>(content, _jsonOptions);
+    }
+
+    public async Task<GenerateRouteResponse?> ReadGenerateRouteResponseAsync(HttpResponseMessage response) {
+        var content = await response.Content.ReadAsStreamAsync();
+        return await JsonSerializer.DeserializeAsync<GenerateRouteResponse>(content, _jsonOptions);
     }
 
     public void Dispose() {

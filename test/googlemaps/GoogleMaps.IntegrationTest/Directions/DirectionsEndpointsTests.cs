@@ -1,5 +1,4 @@
 using System.Net;
-using System.Linq;
 
 namespace GoogleMaps.IntegrationTest;
 
@@ -12,22 +11,15 @@ public class DirectionsEndpointsTests {
     }
 
     [Fact]
-    public async Task GenerateDirectionsShouldReturnTurnByTurnFromStJohnsWoodStationToStElizabethsHospital() {
-        var userId = $"user-{Guid.NewGuid():N}";
+    public async Task GenerateRouteShouldReturnMinimalDrawInstructionsFromStJohnsWoodStationToStElizabethsHospital() {
         var geolocationIds = new List<string>();
 
-        const string stJohnsWoodInput = "St John's Wood Station, London";
+        const string originInput = "St John's Wood Station, London";
         const string destinationInput = "St John & St Elizabeth Hospital, London";
-
-        const double originLatitude = 51.53408;
-        const double originLongitude = -0.17485;
 
         try {
             var places = new[] {
-                new { Input = stJohnsWoodInput, Latitude = 51.53408, Longitude = -0.17485 },
-                new { Input = "Wellington Place, London", Latitude = 51.53412, Longitude = -0.17708 },
-                new { Input = "Grove End Road, London", Latitude = 51.53433, Longitude = -0.18062 },
-                new { Input = "Allitsen Road, London", Latitude = 51.53456, Longitude = -0.18305 },
+                new { Input = originInput, Latitude = 51.53408, Longitude = -0.17485 },
                 new { Input = destinationInput, Latitude = 51.53467, Longitude = -0.18438 }
             };
 
@@ -55,40 +47,36 @@ public class DirectionsEndpointsTests {
                 Assert.False(string.IsNullOrWhiteSpace(geolocation!.PlusCode));
             }
 
-            var locationTimestamp = new DateTimeOffset(2026, 2, 26, 10, 0, 0, TimeSpan.Zero);
-            var postLocationResponse = await _googleMapsClient.PostLocationsAsync(new PostLocationsRequest(
-                userId,
-                new[] {
-                    new LocationPointRequest(originLatitude, originLongitude, locationTimestamp)
-                }
-            ));
-            Assert.Equal(HttpStatusCode.OK, postLocationResponse.StatusCode);
-
-            var generateResponse = await _googleMapsClient.GenerateDirectionsAsync(new GenerateDirectionsRequest(
-                userId,
+            var generateResponse = await _googleMapsClient.GenerateRouteAsync(new GenerateRouteRequest(
+                originInput,
                 destinationInput
             ));
 
             Assert.Equal(HttpStatusCode.OK, generateResponse.StatusCode);
 
-            var directions = await _googleMapsClient.ReadGenerateDirectionsResponseAsync(generateResponse);
-            Assert.NotNull(directions);
-            Assert.Equal(userId, directions!.UserId);
-            Assert.Equal(destinationInput, directions.DestinationInput);
-            Assert.NotEmpty(directions.Steps);
-            Assert.True(directions.TotalDistanceMeters > 0);
-            Assert.False(string.IsNullOrWhiteSpace(directions.OriginPlusCode));
-            Assert.False(string.IsNullOrWhiteSpace(directions.DestinationPlusCode));
-            Assert.All(directions.Steps.Take(directions.Steps.Count - 1), step => Assert.StartsWith("Go ", step.Instruction));
-            Assert.Contains(directions.Steps, step => step.Heading.Contains("west", StringComparison.OrdinalIgnoreCase));
-            Assert.StartsWith("You reached ", directions.Steps[^1].Instruction);
-            Assert.Equal(destinationInput, directions.Steps[^1].TargetInput);
-            Assert.Equal(directions.DestinationPlusCode, directions.Steps[^1].ToPlusCode);
-            Assert.Equal(0, directions.Steps[^1].DistanceMeters);
+            var route = await _googleMapsClient.ReadGenerateRouteResponseAsync(generateResponse);
+            Assert.NotNull(route);
+            Assert.Equal(originInput, route!.OriginInput);
+            Assert.Equal(destinationInput, route.DestinationInput);
+            Assert.True(route.TotalDistanceMeters > 0);
+
+            Assert.Equal(2, route.Path.Count);
+            Assert.Equal(originInput, route.Path[0].Label);
+            Assert.Equal(destinationInput, route.Path[1].Label);
+            Assert.False(string.IsNullOrWhiteSpace(route.Path[0].PlusCode));
+            Assert.False(string.IsNullOrWhiteSpace(route.Path[1].PlusCode));
+
+            Assert.Single(route.Segments);
+            Assert.StartsWith("Go ", route.Segments[0].Instruction);
+            Assert.True(route.Segments[0].DistanceMeters > 0);
+
+            Assert.Equal("polyline", route.Drawing.Type);
+            Assert.Equal("Draw one polyline using the coordinates in order.", route.Drawing.Instruction);
+            Assert.Equal(route.Path.Count, route.Drawing.Coordinates.Count);
+            Assert.Equal(route.Path[0].PlusCode, route.Drawing.Coordinates[0].PlusCode);
+            Assert.Equal(route.Path[1].PlusCode, route.Drawing.Coordinates[1].PlusCode);
         }
         finally {
-            await _googleMapsClient.ClearUserLocationsAsync(userId);
-
             foreach (var geolocationId in geolocationIds) {
                 await _googleMapsClient.DeleteGeolocationAsync(geolocationId);
             }
