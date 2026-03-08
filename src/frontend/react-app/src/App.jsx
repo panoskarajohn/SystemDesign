@@ -1,10 +1,7 @@
+import StJohnsWoodRoutePage from './pages/StJohnsWoodRoutePage';
+
 function App() {
-  return (
-    <main>
-      <h1>React + Vite</h1>
-      <p>Generic Vite React app is running.</p>
-    </main>
-  );
+  return <StJohnsWoodRoutePage />;
 }
 
 export default App;
