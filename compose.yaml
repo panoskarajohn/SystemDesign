@@ -85,6 +85,17 @@
     networks:
       - apinetwork
 
+  frontend:
+    image: frontend
+    build:
+      context: src/frontend/react-app
+      dockerfile: Dockerfile
+    container_name: react-frontend
+    ports:
+      - "5173:5173"
+    networks:
+      - apinetwork
+
   mongodb:
     image: mongo:latest
     restart: unless-stopped

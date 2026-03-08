@@ -48,3 +48,5 @@ msbuild.wrn
 node_modules/
 package-lock.json
 package.json
+!src/frontend/react-app/package.json
+!src/frontend/react-app/package-lock.json
