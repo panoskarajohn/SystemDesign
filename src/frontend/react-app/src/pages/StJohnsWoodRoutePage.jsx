@@ -11,6 +11,32 @@ function formatDistance(distanceMeters) {
   return `${(distanceMeters / 1000).toFixed(2)} km`;
 }
 
+function buildProjectedPoints(points, width, height, padding) {
+  if (!points?.length) {
+    return [];
+  }
+
+  const longitudes = points.map((point) => point.longitude);
+  const latitudes = points.map((point) => point.latitude);
+
+  const minLon = Math.min(...longitudes);
+  const maxLon = Math.max(...longitudes);
+  const minLat = Math.min(...latitudes);
+  const maxLat = Math.max(...latitudes);
+
+  const usableWidth = width - padding * 2;
+  const usableHeight = height - padding * 2;
+  const lonRange = maxLon - minLon || 0.00001;
+  const latRange = maxLat - minLat || 0.00001;
+
+  return points.map((point) => {
+    const x = padding + ((point.longitude - minLon) / lonRange) * usableWidth;
+    const y = height - padding - ((point.latitude - minLat) / latRange) * usableHeight;
+
+    return { ...point, x, y };
+  });
+}
+
 function StJohnsWoodRoutePage() {
   const [route, setRoute] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,6 +48,10 @@ function StJohnsWoodRoutePage() {
     const envUrl = import.meta.env.VITE_GOOGLE_MAPS_API_BASE_URL;
     return envUrl?.trim() || 'http://localhost:1002';
   }, []);
+  const projectedPath = useMemo(
+    () => buildProjectedPoints(route?.drawing?.coordinates || [], 680, 340, 24),
+    [route]
+  );
 
   async function loadRoute() {
     setLoading(true);
@@ -147,6 +177,31 @@ function StJohnsWoodRoutePage() {
               </li>
             ))}
           </ul>
+
+          <h3>Route Preview</h3>
+          <div className="route-canvas">
+            <svg viewBox="0 0 680 340" role="img" aria-label="Route preview">
+              {projectedPath.length > 1 && (
+                <polyline
+                  points={projectedPath.map((point) => `${point.x},${point.y}`).join(' ')}
+                  fill="none"
+                  stroke="#1a73e8"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              )}
+
+              {projectedPath.map((point, index) => (
+                <g key={`${point.plusCode}-${index}`}>
+                  <circle cx={point.x} cy={point.y} r="6" fill={index === 0 ? '#0b6b2f' : '#b11c1c'} />
+                  <text x={point.x + 10} y={point.y - 10} fontSize="12" fill="#172033">
+                    {index + 1}. {point.label}
+                  </text>
+                </g>
+              ))}
+            </svg>
+          </div>
         </section>
       )}
     </main>

@@ -67,3 +67,16 @@ button:disabled {
 .success {
   color: #0b6b2f;
 }
+
+.route-canvas {
+  border: 1px solid #d9e1ef;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  padding: 0.35rem;
+}
+
+.route-canvas svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
