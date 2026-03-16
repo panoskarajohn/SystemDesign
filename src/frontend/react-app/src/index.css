@@ -1,0 +1,107 @@
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #f7f9fc 0%, #eef2f8 100%);
+  color: #172033;
+}
+
+.page {
+  width: min(760px, 92vw);
+  margin: 2rem auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #d9e1ef;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+p,
+ol,
+ul {
+  margin: 0.25rem 0 0.75rem;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  background: #1a73e8;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.muted {
+  color: #5f6d85;
+}
+
+.error {
+  color: #b11c1c;
+}
+
+.success {
+  color: #0b6b2f;
+}
+
+.route-canvas {
+  border: 1px solid #d9e1ef;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  padding: 0.35rem;
+}
+
+.route-canvas svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.map-container {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #d9e1ef;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.map-container .leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Marker styling */
+.marker-start .leaflet-marker-icon {
+  filter: hue-rotate(90deg) saturate(1.5);
+}
+
+.marker-end .leaflet-marker-icon {
+  filter: hue-rotate(0deg) saturate(1.2);
+}

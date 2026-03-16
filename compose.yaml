@@ -59,6 +59,13 @@
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://+:8080"
+      MinIO__Endpoint: "http://swift:9000"
+      MinIO__Bucket: "map-tiles"
+      MinIO__AccessKey: "minioadmin"
+      MinIO__SecretKey: "minioadmin"
+    depends_on:
+      swift:
+        condition: service_healthy
     networks:
       - apinetwork
     healthcheck:
@@ -82,6 +89,17 @@
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - apinetwork
+
+  frontend:
+    image: frontend
+    build:
+      context: src/frontend/react-app
+      dockerfile: Dockerfile
+    container_name: react-frontend
+    ports:
+      - "5173:5173"
     networks:
       - apinetwork
 
@@ -139,11 +157,54 @@
       timeout: 5s
       retries: 5
 
+  swift:
+    image: minio/minio:latest
+    container_name: swift-storage
+    restart: unless-stopped
+    networks:
+      - apinetwork
+    ports:
+      - "8080:9000"
+      - "8081:9001"
+    environment:
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
+    volumes:
+      - swift_data:/minio/data
+    command: server /minio/data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for MinIO to be ready...';
+      sleep 10;
+      /usr/bin/mc alias set myminio http://swift:9000 minioadmin minioadmin --api S3v4;
+      /usr/bin/mc mb myminio/map-tiles --ignore-existing;
+      /usr/bin/mc version enable myminio/map-tiles || true;
+      /usr/bin/mc policy set public myminio/map-tiles || true;
+      echo 'MinIO bucket initialized successfully';
+      exit 0;
+      "
+    depends_on:
+      swift:
+        condition: service_healthy
+    networks:
+      - apinetwork
+
 volumes:
   mongodb_data_container:
   postgres:
     driver: local
   redis_data:
+    driver: local
+  swift_data:
     driver: local
 
 networks:

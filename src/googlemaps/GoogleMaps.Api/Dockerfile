@@ -9,6 +9,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["src/googlemaps/GoogleMaps.Api/GoogleMaps.Api.csproj", "src/googlemaps/GoogleMaps.Api/"]
+COPY ["src/shared/Shared.Mongo/Shared.Mongo.csproj", "src/shared/Shared.Mongo/"]
 
 RUN dotnet restore "src/googlemaps/GoogleMaps.Api/GoogleMaps.Api.csproj"
 

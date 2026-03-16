@@ -8,6 +8,7 @@ This repository contains two backend applications:
 It also includes:
 
 - `RedisPubSub` worker: consumes location update events and maintains nearby-friend Redis sets.
+- `React frontend`: generic Vite-based React app.
 
 ## Services and ports
 
@@ -15,6 +16,7 @@ When running `compose.yaml`:
 
 - `Proximity.Api`: `http://localhost:1000`
 - `NearbyFriends.Api`: `http://localhost:1001`
+- `Frontend`: `http://localhost:5173`
 - `MongoDB`: `localhost:27017`
 - `Postgres`: `localhost:5432`
 - `Redis`: `localhost:6379`
