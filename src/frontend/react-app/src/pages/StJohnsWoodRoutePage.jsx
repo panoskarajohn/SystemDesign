@@ -1,7 +1,17 @@
 import { useMemo, useState } from 'react';
+import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 
 const ORIGIN_INPUT = "St John's Wood Station, London";
 const DESTINATION_INPUT = 'St John & St Elizabeth Hospital, London';
+
+// Fix Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 function formatDistance(distanceMeters) {
   if (distanceMeters < 1000) {
@@ -178,30 +188,54 @@ function StJohnsWoodRoutePage() {
             ))}
           </ul>
 
-          <h3>Route Preview</h3>
-          <div className="route-canvas">
-            <svg viewBox="0 0 680 340" role="img" aria-label="Route preview">
-              {projectedPath.length > 1 && (
-                <polyline
-                  points={projectedPath.map((point) => `${point.x},${point.y}`).join(' ')}
-                  fill="none"
-                  stroke="#1a73e8"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+          <h3>Map View - St John's Wood</h3>
+          {route?.drawing?.coordinates && route.drawing.coordinates.length > 0 && (
+            <div className="map-container">
+              <MapContainer
+                center={[51.53435, -0.17962]}
+                zoom={15}
+                style={{ width: '100%', height: '100%' }}
+              >
+                <TileLayer
+                  url="http://localhost:1002/v1/tiles/{z}/{x}/{y}"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
+                  maxZoom={19}
+                  minZoom={0}
                 />
-              )}
 
-              {projectedPath.map((point, index) => (
-                <g key={`${point.plusCode}-${index}`}>
-                  <circle cx={point.x} cy={point.y} r="6" fill={index === 0 ? '#0b6b2f' : '#b11c1c'} />
-                  <text x={point.x + 10} y={point.y - 10} fontSize="12" fill="#172033">
-                    {index + 1}. {point.label}
-                  </text>
-                </g>
-              ))}
-            </svg>
-          </div>
+                {route.drawing.coordinates.map((point, index) => (
+                  <Marker
+                    key={`${point.plusCode}-${index}`}
+                    position={[point.latitude, point.longitude]}
+                    icon={L.icon({
+                      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+                      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                      iconSize: [25, 41],
+                      iconAnchor: [12, 41],
+                      popupAnchor: [1, -34],
+                      shadowSize: [41, 41],
+                    })}
+                  >
+                    <Popup>
+                      {index + 1}. {point.label}
+                    </Popup>
+                  </Marker>
+                ))}
+
+                {route.drawing.coordinates.length > 1 && (
+                  <Polyline
+                    positions={route.drawing.coordinates.map((point) => [
+                      point.latitude,
+                      point.longitude,
+                    ])}
+                    color="#1a73e8"
+                    weight={4}
+                    opacity={0.8}
+                  />
+                )}
+              </MapContainer>
+            </div>
+          )}
         </section>
       )}
     </main>
