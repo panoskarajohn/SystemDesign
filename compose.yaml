@@ -183,9 +183,13 @@
     container_name: minio-init
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://swift:9000 minioadmin minioadmin;
-      /usr/bin/mc mb myminio/map-tiles || true;
+      echo 'Waiting for MinIO to be ready...';
+      sleep 10;
+      /usr/bin/mc alias set myminio http://swift:9000 minioadmin minioadmin --api S3v4;
+      /usr/bin/mc mb myminio/map-tiles --ignore-existing;
       /usr/bin/mc version enable myminio/map-tiles || true;
+      /usr/bin/mc policy set public myminio/map-tiles || true;
+      echo 'MinIO bucket initialized successfully';
       exit 0;
       "
     depends_on:

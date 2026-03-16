@@ -159,13 +159,13 @@ public static class DirectionsEndpoints {
 
                 var path = new List<RoutePointResponse> {
                     new(
-                        origin.Location.Coordinates.Latitude,     // Try original order
+                        origin.Location.Coordinates.Latitude,
                         origin.Location.Coordinates.Longitude,
                         origin.PlusCode.ToUpperInvariant(),
                         origin.Input
                     ),
                     new(
-                        destination.Location.Coordinates.Latitude,   // Try original order
+                        destination.Location.Coordinates.Latitude,
                         destination.Location.Coordinates.Longitude,
                         destination.PlusCode.ToUpperInvariant(),
                         destination.Input

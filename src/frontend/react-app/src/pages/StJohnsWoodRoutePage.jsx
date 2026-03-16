@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -47,17 +47,34 @@ function buildProjectedPoints(points, width, height, padding) {
   });
 }
 
-function StJohnsWoodRoutePage() {
-  const [route, setRoute] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [seeding, setSeeding] = useState(false);
-  const [error, setError] = useState('');
-  const [seedMessage, setSeedMessage] = useState('');
+function MapFitBounds({ coordinates }) {
+  const mapRef = useRef(null);
 
-  const apiBaseUrl = useMemo(() => {
-    const envUrl = import.meta.env.VITE_GOOGLE_MAPS_API_BASE_URL;
-    return envUrl?.trim() || 'http://localhost:1002';
-  }, []);
+  useEffect(() => {
+    if (!mapRef.current || !coordinates || coordinates.length === 0) return;
+
+    const map = mapRef.current;
+    const bounds = L.latLngBounds(
+      coordinates.map((point) => [point.latitude, point.longitude])
+    );
+    map.fitBounds(bounds, { padding: [50, 50] });
+  }, [coordinates]);
+
+  return null;
+}
+
+function StJohnsWoodRoutePage() {
+   const [route, setRoute] = useState(null);
+   const [loading, setLoading] = useState(false);
+   const [seeding, setSeeding] = useState(false);
+   const [error, setError] = useState('');
+   const [seedMessage, setSeedMessage] = useState('');
+   const mapRef = useRef(null);
+
+   const apiBaseUrl = useMemo(() => {
+     const envUrl = import.meta.env.VITE_GOOGLE_MAPS_API_BASE_URL;
+     return envUrl?.trim() || 'http://localhost:1002';
+   }, []);
   const projectedPath = useMemo(
     () => buildProjectedPoints(route?.drawing?.coordinates || [], 680, 340, 24),
     [route]
@@ -87,7 +104,9 @@ function StJohnsWoodRoutePage() {
       }
 
       const payload = await response.json();
-      setRoute(payload);
+       console.log('Route loaded:', payload);
+       console.log('Drawing coordinates:', payload.drawing.coordinates);
+       setRoute(payload);
     }
     catch {
       setRoute(null);
@@ -104,8 +123,8 @@ function StJohnsWoodRoutePage() {
     setSeedMessage('');
 
     const places = [
-      { input: ORIGIN_INPUT, latitude: 51.53408, longitude: -0.17485 },
-      { input: DESTINATION_INPUT, latitude: 51.53467, longitude: -0.18438 }
+      { input: ORIGIN_INPUT, latitude: 51.53477996809328, longitude: -0.17413096897787722 },
+      { input: DESTINATION_INPUT, latitude: 51.53339134463142, longitude: -0.17471495906339501 }
     ];
 
     try {
@@ -133,7 +152,8 @@ function StJohnsWoodRoutePage() {
         }
       }
 
-      setSeedMessage('Seeded geolocations. You can now load the route.');
+       setSeedMessage('Seeded geolocations. You can now load the route.');
+       console.log('Seeded locations:', places);
     }
     catch {
       setError('Could not connect to the API.');
@@ -189,13 +209,15 @@ function StJohnsWoodRoutePage() {
           </ul>
 
           <h3>Map View - St John's Wood</h3>
-          {route?.drawing?.coordinates && route.drawing.coordinates.length > 0 && (
-            <div className="map-container">
-              <MapContainer
-                center={[51.53435, -0.17962]}
-                zoom={15}
-                style={{ width: '100%', height: '100%' }}
-              >
+           {route?.drawing?.coordinates && route.drawing.coordinates.length > 0 && (
+             <div className="map-container">
+               <MapContainer
+                 ref={mapRef}
+                 center={[51.52774, -0.17758]}
+                 zoom={14}
+                 style={{ width: '100%', height: '100%' }}
+               >
+                 <MapFitBounds coordinates={route.drawing.coordinates} />
                 <TileLayer
                   url="http://localhost:1002/v1/tiles/{z}/{x}/{y}"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
@@ -203,24 +225,34 @@ function StJohnsWoodRoutePage() {
                   minZoom={0}
                 />
 
-                {route.drawing.coordinates.map((point, index) => (
-                  <Marker
-                    key={`${point.plusCode}-${index}`}
-                    position={[point.latitude, point.longitude]}
-                    icon={L.icon({
-                      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-                      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                      iconSize: [25, 41],
-                      iconAnchor: [12, 41],
-                      popupAnchor: [1, -34],
-                      shadowSize: [41, 41],
-                    })}
-                  >
-                    <Popup>
-                      {index + 1}. {point.label}
-                    </Popup>
-                  </Marker>
-                ))}
+                {route.drawing.coordinates.map((point, index) => {
+                  // Use different colors for start (green) and end (red)
+                  const isStart = index === 0;
+                  const markerColor = isStart ? '0b6b2f' : 'b11c1c'; // green or red
+                  const markerIconUrl = `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${isStart ? '0b6b2f' : 'b11c1c'}.png`;
+                  
+                  return (
+                    <Marker
+                      key={`${point.plusCode}-${index}`}
+                      position={[point.latitude, point.longitude]}
+                      icon={L.icon({
+                        iconUrl: isStart 
+                          ? 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png'
+                          : 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41],
+                        className: isStart ? 'marker-start' : 'marker-end',
+                      })}
+                    >
+                      <Popup>
+                        {index + 1}. {point.label}
+                      </Popup>
+                    </Marker>
+                  );
+                })}
 
                 {route.drawing.coordinates.length > 1 && (
                   <Polyline
